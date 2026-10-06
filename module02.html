@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2: Vector Spaces, Basis &amp; Rank | MathMatrix AI</title>
+<meta name="description" content="Linear combinations, span, independence, basis, rank, and kernel, explained step by step with worked examples and real-life uses.">
+<script>window.MathJax = { tex: { inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]] }, svg: { fontCache: "global" } };</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg-full.min.js"></script>
+<link rel="stylesheet" href="assets/lesson.css">
+<script src="assets/lesson.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div class="topbar"><div class="topbar-inner">
+  <a href="index.html" class="back-link">← Course Home</a>
+  <span class="topbar-inst">MathMatrix AI · Clark Ngo</span>
+</div></div>
+
+<header class="lesson-header"><div class="header-inner">
+  <span class="eyebrow">Module 2 · Linear Algebra</span>
+  <h1>Vector Spaces, Basis, Rank &amp; Linear Mappings</h1>
+  <p class="tagline">Which vectors can you build from a few "ingredient" vectors? The answer tells you how much real information a dataset holds.</p>
+  <div class="meta-row">
+    <span>📊 Beginner–Intermediate</span><span>⏱ ~2 hours</span><span>🧮 Needs: Module 1</span>
+    <div class="header-actions"><button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button></div>
+  </div>
+</div></header>
+
+<nav class="section-nav" aria-label="Lesson sections"><div class="section-nav-inner">
+  <a href="#overview">Overview</a>
+  <a href="#s1">Combinations &amp; Span</a>
+  <a href="#s2">Independence</a>
+  <a href="#s3">Basis</a>
+  <a href="#s4">Rank</a>
+  <a href="#s5">Kernel</a>
+  <a href="#review">Review</a>
+</div></nav>
+
+<div class="layout"><main id="main">
+
+<section id="overview" class="module overview-box">
+  <h2>Lesson overview</h2>
+  <p>In Module 0 you learned to scale and add vectors. This module asks: if you're only allowed a few starting vectors, what can you build? That question leads to four ideas (span, independence, basis, rank) that tell you whether your data has redundant columns, which matters every time you fit a model.</p>
+  <h3>By the end of this module you will be able to</h3>
+  <ul class="lo-display">
+    <li>Decide whether a vector can be built from other vectors, and find the recipe.</li>
+    <li>Tell whether a set of vectors is independent or has a redundant member.</li>
+    <li>Explain what a basis is and find coordinates in a new basis.</li>
+    <li>Compute the rank of a small matrix and say what it means for data.</li>
+    <li>Find the kernel: the inputs a matrix sends to zero.</li>
+  </ul>
+  <div class="need-grid">
+    <div class="need-card"><b>You need</b>Adding and scaling vectors (Module 0); solving 2×2 systems (Module 1).</div>
+    <div class="need-card"><b>This unlocks</b>Projections (Module 4), eigenvectors (Module 5), and diagnosing bad regression data.</div>
+  </div>
+</section>
+
+<section id="s1" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🧪</span><h2>Linear combinations and span: what can you build?</h2><span class="module-time">≈ 25 min</span></div>
+  <p>A <dfn>linear combination</dfn> of vectors $\mathbf{u}$ and $\mathbf{v}$ is $a\mathbf{u} + b\mathbf{v}$ for some numbers $a$ and $b$. The <dfn>span</dfn> is everything you can make this way, using every possible $a$ and $b$.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · can we build $(7, 4)$ from $\mathbf{u} = (1, 2)$ and $\mathbf{v} = (3, 1)$?</span>
+    <ol class="steps">
+      <li><div class="step-math">$a(1, 2) + b(3, 1) = (7, 4)$</div><div class="step-why">We're looking for the amounts $a$ and $b$.</div></li>
+      <li><div class="step-math">$a + 3b = 7, \qquad 2a + b = 4$</div><div class="step-why">Match the first entries, then the second entries. It's a Module 1 system!</div></li>
+      <li><div class="step-math">$b = 4 - 2a \;\Rightarrow\; a + 3(4 - 2a) = 7 \;\Rightarrow\; -5a = -5 \;\Rightarrow\; a = 1$</div><div class="step-why">Solve the second equation for $b$ and substitute.</div></li>
+      <li><div class="step-math">$b = 4 - 2(1) = 2$</div><div class="step-why">Back-substitute.</div></li>
+      <li><div class="step-math">Check: $1(1, 2) + 2(3, 1) = (1 + 6,\; 2 + 2) = (7, 4)$ ✓</div><div class="step-why"></div></li>
+    </ol>
+    <div class="result">Recipe: $(7, 4) = 1\cdot\mathbf{u} + 2\cdot\mathbf{v}$</div>
+  </div>
+  <p>In fact $\mathbf{u}$ and $\mathbf{v}$ can build <em>every</em> point in the plane, because they point in genuinely different directions. Their span is the whole 2D plane, written $\mathbb{R}^2$.</p>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Your screen makes every color by mixing just three lights: red, green, and blue. Every color is a linear combination $r\cdot\text{Red} + g\cdot\text{Green} + b\cdot\text{Blue}$, so the span of those three is every color the screen can show. A printer with only red and yellow ink can make oranges, but never blue: blue isn't in their span.</p>
+    <span class="hook">Span = everything you can mix from your ingredients.</span>
+  </div>
+  <details class="check">
+    <summary>Try it yourself <span class="reveal-hint">(click to reveal the answer)</span></summary>
+    <div class="check-q">Write $(5, 5)$ as a combination of $(1, 2)$ and $(3, 1)$.</div>
+    <div class="check-a">$a + 3b = 5$ and $2a + b = 5$. From the second, $b = 5 - 2a$; then $a + 15 - 6a = 5$, so $a = 2$ and $b = 1$. Check: $2(1,2) + 1(3,1) = (5, 5)$ ✓.</div>
+  </details>
+</section>
+
+<section id="s2" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🧩</span><h2>Linear independence: is anyone redundant?</h2><span class="module-time">≈ 20 min</span></div>
+  <p>Vectors are <dfn>linearly independent</dfn> if none of them can be built from the others. If one can, it's <dfn>dependent</dfn>: it adds nothing new.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · $(1, 2)$ and $(2, 4)$</span>
+    <ol class="steps">
+      <li><div class="step-math">$(2, 4) = 2 \times (1, 2)$</div><div class="step-why">The second vector is just the first one stretched.</div></li>
+      <li><div class="step-math">$a(1, 2) + b(2, 4) = (a + 2b)(1, 2)$</div><div class="step-why">Any combination is still a multiple of $(1, 2)$.</div></li>
+    </ol>
+    <div class="result">Dependent. Their span is only a line through the origin, not the whole plane. You can never build $(1, 0)$ from them.</div>
+  </div>
+  <p>Quick test for two vectors in 2D: put them as columns of a matrix and compute the determinant. $\det\begin{bmatrix}1&2\\2&4\end{bmatrix} = 4 - 4 = 0$ means dependent; $\det\begin{bmatrix}1&3\\2&1\end{bmatrix} = 1 - 6 = -5 \ne 0$ means independent.</p>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>A weather dataset with both "temperature in °C" and "temperature in °F" has a redundant column: $F = 1.8C + 32$, so once you know one you know the other. A survey that asks "How old are you?" and "What year were you born?" has the same problem. Redundant columns confuse regression models (Module 1's $X^\top X$ can't be inverted), so data scientists check for them first.</p>
+    <span class="hook">Dependent = "I could have told you that already."</span>
+  </div>
+</section>
+
+<section id="s3" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🧭</span><h2>Basis: the smallest complete set of ingredients</h2><span class="module-time">≈ 25 min</span></div>
+  <p>A <dfn>basis</dfn> is a set of vectors that (1) spans the whole space and (2) is independent. It's a minimal set that can build everything, with no waste. The number of vectors in a basis is the <dfn>dimension</dfn>: a plane needs 2, 3D space needs 3.</p>
+  <p>The usual basis for the plane is $\mathbf{e}_1 = (1, 0)$ and $\mathbf{e}_2 = (0, 1)$: "right one" and "up one". When you write $(7, 4)$, you secretly mean $7\mathbf{e}_1 + 4\mathbf{e}_2$.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · the same point in a different basis</span>
+    <p>Use the basis $\mathbf{u} = (1, 2)$, $\mathbf{v} = (3, 1)$ instead.</p>
+    <ol class="steps">
+      <li><div class="step-math">$(7, 4) = 1\mathbf{u} + 2\mathbf{v}$</div><div class="step-why">We found this recipe in Section 1.</div></li>
+      <li><div class="step-math">Coordinates in the new basis: $(1, 2)$</div><div class="step-why">Same point, different description. The numbers depend on which "rulers" you measure with.</div></li>
+    </ol>
+    <div class="result">Standard coordinates $(7, 4)$ = new-basis coordinates $(1, 2)$. Changing basis is just re-describing the same thing.</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Directions in a city: "3 blocks east and 4 blocks north" uses east and north as a basis. In a city with diagonal avenues, a local might say "2 blocks up the avenue, then 1 block across": different basis, same destination. In ML, PCA (Module 5) finds a new basis for your data where the first direction captures the most variation, like describing people by "overall size" instead of separate height and weight.</p>
+    <span class="hook">A basis is a set of rulers. Change the rulers, and the numbers change, but the thing doesn't.</span>
+  </div>
+</section>
+
+<section id="s4" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">📏</span><h2>Rank: how much real information is in a matrix?</h2><span class="module-time">≈ 20 min</span></div>
+  <p>The <dfn>rank</dfn> of a matrix is the number of independent rows (which always equals the number of independent columns). It counts how many genuinely different pieces of information the matrix holds.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · rank of $\begin{bmatrix}1&2&3\\2&4&6\\1&0&1\end{bmatrix}$</span>
+    <ol class="steps">
+      <li><div class="step-math">Row 2 $= 2 \times$ Row 1</div><div class="step-why">$(2, 4, 6) = 2(1, 2, 3)$. Row 2 is redundant.</div></li>
+      <li><div class="step-math">Row 2 − 2·Row 1 $= (0, 0, 0)$</div><div class="step-why">Elimination (Module 1) turns a redundant row into all zeros.</div></li>
+      <li><div class="step-math">Rows 1 and 3, $(1, 2, 3)$ and $(1, 0, 1)$, aren't multiples of each other</div><div class="step-why">So they're independent.</div></li>
+    </ol>
+    <div class="result">Rank = 2. Three rows, but only two pieces of real information.</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Think of a movie-ratings table: millions of users by thousands of movies. People's tastes are driven by a handful of factors (likes action, likes comedy, likes older films…), so the table has <em>low rank</em> even though it's huge. Streaming services use this to fill in the blanks and predict ratings you haven't given yet.</p>
+    <span class="hook">Rank = how many questions you really asked, after removing repeats.</span>
+  </div>
+  <pre><code>import numpy as np
+M = np.array([[1, 2, 3], [2, 4, 6], [1, 0, 1]])
+print(np.linalg.matrix_rank(M))   # 2</code></pre>
+</section>
+
+<section id="s5" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🕳️</span><h2>Kernel: the inputs that disappear</h2><span class="module-time">≈ 20 min</span></div>
+  <p>The <dfn>kernel</dfn> (or null space) of a matrix $A$ is every input $\mathbf{x}$ with $A\mathbf{x} = \mathbf{0}$: changes to the input that the matrix can't see.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · kernel of $A = \begin{bmatrix}1&2\\2&4\end{bmatrix}$</span>
+    <ol class="steps">
+      <li><div class="step-math">$x + 2y = 0, \quad 2x + 4y = 0$</div><div class="step-why">Write out $A\mathbf{x} = \mathbf{0}$. The second equation is just twice the first.</div></li>
+      <li><div class="step-math">$x = -2y$</div><div class="step-why">Only one real equation, so one variable stays free.</div></li>
+      <li><div class="step-math">$\mathbf{x} = t(-2, 1)$ for any number $t$</div><div class="step-why">Check: $1(-2) + 2(1) = 0$ ✓.</div></li>
+    </ol>
+    <div class="result">The kernel is a whole line of inputs, all sent to $(0, 0)$.</div>
+  </div>
+  <p>A neat fact ties this together, the <dfn>rank–nullity theorem</dfn>: rank + (dimension of the kernel) = number of columns. Here: rank 1 + kernel dimension 1 = 2 columns. Every dimension either survives (rank) or gets crushed (kernel).</p>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>A kitchen scale that only reports the <em>total</em> weight of flour plus sugar can't tell "add 1 cup flour, remove 1 cup sugar" from doing nothing: that swap is in its kernel. In regression, if your data has redundant columns, there's a kernel of parameter changes that leave every prediction unchanged, so the model can't decide between them. That's why the fitted coefficients jump around wildly on such data.</p>
+    <span class="hook">The kernel is the blind spot: changes the matrix can't see.</span>
+  </div>
+</section>
+
+<section id="review" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">✅</span><h2>Check your understanding</h2></div>
+  <div class="q-card" data-explain="$(3, 6) = 3(1, 2)$, so the second vector adds nothing new.">
+    <div class="q-stem"><span class="q-num">1.</span>Are $(1, 2)$ and $(3, 6)$ independent?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-why="Is one a multiple of the other?">Yes</button>
+      <button class="q-opt" data-correct>No, one is a multiple of the other</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="A plane is 2-dimensional, so a basis has exactly 2 vectors. Three vectors in a plane must include a redundant one.">
+    <div class="q-stem"><span class="q-num">2.</span>How many vectors are in any basis of the plane $\mathbb{R}^2$?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-why="One vector only spans a line.">1</button>
+      <button class="q-opt" data-correct>2</button>
+      <button class="q-opt" data-why="Three vectors in a plane can't all be independent.">3</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="A height-in-cm column and a height-in-inches column carry the same information, so the data's rank is lower than its column count.">
+    <div class="q-stem"><span class="q-num">3.</span>A dataset has columns: height (cm), height (inches), weight. What is its rank (assuming weight isn't a multiple of height)?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-why="One of the height columns is redundant.">3</button>
+      <button class="q-opt" data-correct>2</button>
+      <button class="q-opt" data-why="Weight adds real information.">1</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="glossary" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">📖</span><h2>Key terms</h2></div>
+  <dl class="glossary">
+    <dt>Span</dt><dd>Every vector you can build as a linear combination of a given set.</dd>
+    <dt>Independent</dt><dd>No vector in the set can be built from the others.</dd>
+    <dt>Basis</dt><dd>An independent set that spans the whole space.</dd>
+    <dt>Dimension</dt><dd>The number of vectors in a basis.</dd>
+    <dt>Rank</dt><dd>The number of independent rows (or columns) of a matrix.</dd>
+    <dt>Kernel</dt><dd>All inputs that a matrix sends to the zero vector.</dd>
+  </dl>
+</section>
+
+<nav class="lesson-nav" aria-label="Lesson navigation">
+  <a class="nav-btn" href="module01.html"><small>Previous</small>← Module 1: Linear Systems</a>
+  <a class="nav-btn next" href="module03.html"><small>Next</small>Module 3: Norms &amp; Inner Products →</a>
+</nav>
+
+</main></div>
+<footer>MathMatrix AI &nbsp;|&nbsp; Curriculum by Clark Ngo<br>Every worked example on this page was checked numerically.</footer>
+</body>
+</html>

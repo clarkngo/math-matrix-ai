@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5: Determinants, Eigenvalues &amp; Eigenvectors | MathMatrix AI</title>
+<meta name="description" content="Determinants as area scaling, eigenvalues and eigenvectors, power iteration, SVD, and PCA, step by step with real-life uses.">
+<script>window.MathJax = { tex: { inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]] }, svg: { fontCache: "global" } };</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg-full.min.js"></script>
+<link rel="stylesheet" href="assets/lesson.css">
+<script src="assets/lesson.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div class="topbar"><div class="topbar-inner">
+  <a href="index.html" class="back-link">← Course Home</a>
+  <span class="topbar-inst">MathMatrix AI · Clark Ngo</span>
+</div></div>
+
+<header class="lesson-header"><div class="header-inner">
+  <span class="eyebrow">Module 5 · Matrix Decompositions</span>
+  <h1>Determinants, Eigenvalues &amp; Eigenvectors</h1>
+  <p class="tagline">Most directions get turned when a matrix acts on them. A few special ones only get stretched, and they reveal what the matrix really does.</p>
+  <div class="meta-row">
+    <span>📊 Intermediate</span><span>⏱ ~2.5 hours</span><span>🧮 Needs: Modules 1, 2, 4</span>
+    <div class="header-actions"><button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button></div>
+  </div>
+</div></header>
+
+<nav class="section-nav" aria-label="Lesson sections"><div class="section-nav-inner">
+  <a href="#overview">Overview</a>
+  <a href="#s1">Determinant</a>
+  <a href="#s2">Eigenvectors</a>
+  <a href="#s3">Finding Them</a>
+  <a href="#s4">Power Iteration</a>
+  <a href="#s5">SVD &amp; PCA</a>
+  <a href="#review">Review</a>
+</div></nav>
+
+<div class="layout"><main id="main">
+
+<section id="overview" class="module overview-box">
+  <h2>Lesson overview</h2>
+  <p>Think of a matrix as a machine that moves every point in the plane (Module 1). Two questions describe the machine: <em>how much does it stretch area?</em> (the determinant) and <em>which directions does it leave pointing the same way?</em> (eigenvectors). Those directions are the key to PCA, Google's original PageRank, and compressing images.</p>
+  <h3>By the end of this module you will be able to</h3>
+  <ul class="lo-display">
+    <li>Interpret a determinant as an area scale factor, and explain what 0 and negative values mean.</li>
+    <li>Check whether a vector is an eigenvector and find its eigenvalue.</li>
+    <li>Find the eigenvalues and eigenvectors of a 2×2 matrix by hand.</li>
+    <li>Explain power iteration and why it finds the biggest eigenvector.</li>
+    <li>Describe what SVD and PCA do, and why they compress data.</li>
+  </ul>
+  <div class="need-grid">
+    <div class="need-card"><b>You need</b>Matrix × vector and the 2×2 determinant (Module 1); solving a quadratic $ax^2 + bx + c = 0$.</div>
+    <div class="need-card"><b>This unlocks</b>Covariance shapes (Module 8), learning-rate limits (Module 9), PCA.</div>
+  </div>
+</section>
+
+<section id="s1" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🟦</span><h2>The determinant: how much does area stretch?</h2><span class="module-time">≈ 20 min</span></div>
+  <p>Apply a matrix to the unit square (the square with corners $(0,0)$, $(1,0)$, $(0,1)$, $(1,1)$). It becomes a parallelogram. The <dfn>determinant</dfn> is that parallelogram's area.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · $A = \begin{bmatrix}2&1\\1&2\end{bmatrix}$</span>
+    <ol class="steps">
+      <li><div class="step-math">$A(1, 0) = (2, 1), \quad A(0, 1) = (1, 2)$</div><div class="step-why">The square's two edges land on the columns of $A$.</div></li>
+      <li><div class="step-math">$\det A = 2\cdot2 - 1\cdot1 = 3$</div><div class="step-why">The $ad - bc$ formula from Module 1.</div></li>
+    </ol>
+    <div class="result">Every shape's area gets multiplied by 3 under this matrix.</div>
+  </div>
+  <div class="table-scroll"><table class="symbol-table">
+    <thead><tr><th>Determinant</th><th>What it means</th></tr></thead>
+    <tbody>
+      <tr><td>$&gt; 1$</td><td>Areas grow</td></tr>
+      <tr><td>between 0 and 1</td><td>Areas shrink</td></tr>
+      <tr><td>$0$</td><td>The plane gets squashed flat onto a line, information is lost, and there's no inverse</td></tr>
+      <tr><td>negative</td><td>The shape is also flipped, like a mirror image</td></tr>
+    </tbody>
+  </table></div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Resize a photo to 2× the width and 3× the height: the matrix is $\begin{bmatrix}2&0\\0&3\end{bmatrix}$, its determinant is 6, and the file has 6 times as many pixels. Mirror the photo and the determinant becomes negative. Squash it to a 1-pixel-tall strip and the determinant is 0: you can't un-squash it, because the detail is gone.</p>
+    <span class="hook">The determinant is the area multiplier. Zero means flattened beyond repair.</span>
+  </div>
+</section>
+
+<section id="s2" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🎯</span><h2>Eigenvectors: directions that only stretch</h2><span class="module-time">≈ 20 min</span></div>
+  <p>Most vectors change direction when you multiply by a matrix. An <dfn>eigenvector</dfn> is a vector whose direction stays the same; it only gets stretched by a number $\lambda$ (lambda), its <dfn>eigenvalue</dfn>:</p>
+  $$A\mathbf{v} = \lambda\mathbf{v}.$$
+  <div class="worked-example">
+    <span class="box-label">Worked example · test three vectors with $A = \begin{bmatrix}2&1\\1&2\end{bmatrix}$</span>
+    <ol class="steps">
+      <li><div class="step-math">$A(1, 1) = (2 + 1,\; 1 + 2) = (3, 3) = 3\,(1, 1)$</div><div class="step-why">Same direction, 3 times longer. Eigenvector, with $\lambda = 3$.</div></li>
+      <li><div class="step-math">$A(1, -1) = (2 - 1,\; 1 - 2) = (1, -1) = 1\,(1, -1)$</div><div class="step-why">Unchanged. Eigenvector, with $\lambda = 1$.</div></li>
+      <li><div class="step-math">$A(1, 0) = (2, 1)$</div><div class="step-why">$(2, 1)$ isn't a multiple of $(1, 0)$: the direction changed. Not an eigenvector.</div></li>
+    </ol>
+    <div class="result">This matrix stretches the diagonal $(1, 1)$ by 3 and leaves the anti-diagonal $(1, -1)$ alone. Notice $3 \times 1 = 3 = \det A$: the determinant is always the product of the eigenvalues.</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Spin a globe: every point moves except those on the axis through the poles. That axis is an eigenvector of the rotation, with eigenvalue 1. Stretch a sheet of pizza dough by pulling left and right: horizontal lines stay horizontal (eigenvector, big $\lambda$), vertical lines stay vertical (eigenvector, $\lambda$ a bit under 1 as the dough thins), and diagonals get tilted.</p>
+    <span class="hook">Eigenvectors are the directions that don't turn, only stretch.</span>
+  </div>
+</section>
+
+<section id="s3" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🔍</span><h2>Finding eigenvalues by hand</h2><span class="module-time">≈ 25 min</span></div>
+  <p>Rewrite $A\mathbf{v} = \lambda\mathbf{v}$ as $(A - \lambda I)\mathbf{v} = \mathbf{0}$, where $I$ is the identity matrix (1s on the diagonal, 0s elsewhere). A nonzero $\mathbf{v}$ can only be sent to zero if the matrix $A - \lambda I$ squashes the plane, so its determinant must be 0.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · eigenvalues of $A = \begin{bmatrix}2&1\\1&2\end{bmatrix}$</span>
+    <ol class="steps">
+      <li><div class="step-math">$A - \lambda I = \begin{bmatrix}2 - \lambda & 1\\1 & 2 - \lambda\end{bmatrix}$</div><div class="step-why">Subtract $\lambda$ from the diagonal entries only.</div></li>
+      <li><div class="step-math">$\det = (2 - \lambda)^2 - 1 = 0$</div><div class="step-why">$ad - bc$ again.</div></li>
+      <li><div class="step-math">$(2 - \lambda)^2 = 1 \;\Rightarrow\; 2 - \lambda = \pm 1$</div><div class="step-why">Take the square root of both sides; keep both signs.</div></li>
+      <li><div class="step-math">$\lambda = 1 \;\text{ or }\; \lambda = 3$</div><div class="step-why">The two eigenvalues.</div></li>
+      <li><div class="step-math">For $\lambda = 3$: $\begin{bmatrix}-1&1\\1&-1\end{bmatrix}\mathbf{v} = \mathbf{0} \Rightarrow v_1 = v_2 \Rightarrow \mathbf{v} = (1, 1)$</div><div class="step-why">Plug each eigenvalue back in and solve, like finding a kernel in Module 2.</div></li>
+    </ol>
+  </div>
+  <div class="bridge-box">
+    <span class="box-label">You already know this</span>
+    <p>Step 2 is just a quadratic equation in $\lambda$. You could expand it to $\lambda^2 - 4\lambda + 3 = 0$ and factor it as $(\lambda - 1)(\lambda - 3) = 0$.</p>
+  </div>
+  <details class="check">
+    <summary>Try it yourself <span class="reveal-hint">(click to reveal the answer)</span></summary>
+    <div class="check-q">Find the eigenvalues of $\begin{bmatrix}4&0\\0&2\end{bmatrix}$.</div>
+    <div class="check-a">$(4 - \lambda)(2 - \lambda) - 0 = 0$, so $\lambda = 4$ or $2$. For a diagonal matrix, the eigenvalues are just the diagonal entries, and the eigenvectors are the axes $(1, 0)$ and $(0, 1)$.</div>
+  </details>
+</section>
+
+<section id="s4" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🔁</span><h2>Power iteration: multiply until it settles</h2><span class="module-time">≈ 15 min</span></div>
+  <p>Keep multiplying any starting vector by $A$. The part along the eigenvector with the biggest eigenvalue grows fastest, so the vector swings toward that direction.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · start at $(1, 0)$ with $A = \begin{bmatrix}2&1\\1&2\end{bmatrix}$</span>
+    <ol class="steps">
+      <li><div class="step-math">$A(1, 0) = (2, 1)$</div><div class="step-why">Ratio of entries: $2/1 = 2$.</div></li>
+      <li><div class="step-math">$A(2, 1) = (5, 4)$</div><div class="step-why">Ratio $1.25$.</div></li>
+      <li><div class="step-math">$A(5, 4) = (14, 13)$</div><div class="step-why">Ratio $1.08$, heading toward 1, which means the direction $(1, 1)$.</div></li>
+      <li><div class="step-math">$\lVert(14, 13)\rVert / \lVert(5, 4)\rVert = 19.1 / 6.4 \approx 2.98$</div><div class="step-why">Each step multiplies the length by about 3, the top eigenvalue.</div></li>
+    </ol>
+    <div class="result">Repeated multiplication found the top eigenvector $(1, 1)$ and eigenvalue $3$ without solving any equation.</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Google's original PageRank was power iteration. Imagine millions of people clicking links at random; after many rounds, the share of people on each page settles down. That settled vector, the top eigenvector of the web's link matrix, ranks every page by importance. Viral content spreads the same way: repeated sharing amplifies whatever direction grows fastest.</p>
+    <span class="hook">Keep applying the matrix, and the strongest direction wins.</span>
+  </div>
+</section>
+
+<section id="s5" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🗜️</span><h2>SVD and PCA: finding the directions that matter</h2><span class="module-time">≈ 30 min</span></div>
+  <p>Any matrix, even a non-square one, can be split into <strong>rotate → stretch → rotate</strong>. This is the <dfn>singular value decomposition</dfn> (SVD), $A = U\Sigma V^\top$. The stretch amounts are the <dfn>singular values</dfn>; they're the square roots of the eigenvalues of $A^\top A$.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · singular values of $A = \begin{bmatrix}3&0\\4&5\end{bmatrix}$</span>
+    <ol class="steps">
+      <li><div class="step-math">$A^\top A = \begin{bmatrix}3&4\\0&5\end{bmatrix}\begin{bmatrix}3&0\\4&5\end{bmatrix} = \begin{bmatrix}25&20\\20&25\end{bmatrix}$</div><div class="step-why">Row-times-column, as in Module 1.</div></li>
+      <li><div class="step-math">Eigenvalues: $25 \pm 20 = 45$ and $5$</div><div class="step-why">Same pattern as the $\begin{bmatrix}2&1\\1&2\end{bmatrix}$ example: diagonal ± off-diagonal.</div></li>
+      <li><div class="step-math">$\sigma_1 = \sqrt{45} \approx 6.71, \quad \sigma_2 = \sqrt{5} \approx 2.24$</div><div class="step-why">The matrix stretches by 6.71 in its strongest direction and 2.24 in the other.</div></li>
+    </ol>
+  </div>
+  <p><dfn>PCA</dfn> (principal component analysis) applies the same idea to data: find the directions where the data varies most.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · PCA on five points</span>
+    <p>Points: $(-2, -2)$, $(-1, -1.2)$, $(0, 0.2)$, $(1, 0.8)$, $(2, 2.2)$. They lie almost on a diagonal line.</p>
+    <ol class="steps">
+      <li><div class="step-math">Covariance matrix $\approx \begin{bmatrix}2.50&2.60\\2.60&2.74\end{bmatrix}$</div><div class="step-why">How much each coordinate spreads (diagonal) and how they move together (off-diagonal). Module 8 explains covariance in detail.</div></li>
+      <li><div class="step-math">Eigenvalues $\approx 5.22$ and $0.017$; top eigenvector $\approx (0.69, 0.72)$</div><div class="step-why">The top direction is the diagonal, as the picture suggests.</div></li>
+      <li><div class="step-math">$5.22 / (5.22 + 0.017) \approx 99.7\%$</div><div class="step-why">Share of all variation captured by that one direction.</div></li>
+    </ol>
+    <div class="result">Two numbers per point can be replaced by one (position along the diagonal) while losing only 0.3% of the information.</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <ul>
+      <li><strong>Image compression:</strong> a photo is a matrix of pixel brightness. Keep only the top 20 singular values and you can rebuild a recognizable image from a small fraction of the numbers.</li>
+      <li><strong>Surveys:</strong> 20 customer-satisfaction questions often boil down to 2 or 3 PCA directions, like "overall happiness" and "price sensitivity".</li>
+      <li><strong>Face recognition</strong> systems once used "eigenfaces", the top eigenvectors of thousands of face photos.</li>
+    </ul>
+    <span class="hook">SVD = rotate, stretch, rotate. PCA keeps the stretchiest directions and drops the rest.</span>
+  </div>
+</section>
+
+<section id="review" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">✅</span><h2>Check your understanding</h2></div>
+  <div class="q-card" data-explain="$\det = 0$ means the plane is squashed onto a line, so areas become 0 and the matrix can't be undone.">
+    <div class="q-stem"><span class="q-num">1.</span>A matrix has determinant 0. What happens to the unit square?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-why="That's a determinant of 1.">It keeps its area</button>
+      <button class="q-opt" data-correct>It gets flattened onto a line (area 0)</button>
+      <button class="q-opt" data-why="Flipping gives a negative determinant.">It gets flipped</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="$A(0, 1) = (0, 5) = 5(0, 1)$. It's an eigenvector with eigenvalue 5.">
+    <div class="q-stem"><span class="q-num">2.</span>For $A = \begin{bmatrix}3&0\\0&5\end{bmatrix}$, what is the eigenvalue for $\mathbf{v} = (0, 1)$?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-why="That one goes with $(1, 0)$.">3</button>
+      <button class="q-opt" data-correct>5</button>
+      <button class="q-opt" data-why="That's the determinant, the product of both eigenvalues.">15</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="PCA keeps the directions with the largest eigenvalues of the covariance matrix, where the data spreads out most.">
+    <div class="q-stem"><span class="q-num">3.</span>PCA keeps the directions with…</div>
+    <div class="q-opts">
+      <button class="q-opt" data-correct>the largest variation in the data</button>
+      <button class="q-opt" data-why="Those carry the least information, so PCA drops them.">the smallest variation in the data</button>
+      <button class="q-opt" data-why="PCA picks new directions, usually not the original axes.">the original x and y axes</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="glossary" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">📖</span><h2>Key terms</h2></div>
+  <dl class="glossary">
+    <dt>Determinant</dt><dd>The factor by which a matrix scales area (or volume); negative if it flips.</dd>
+    <dt>Eigenvector</dt><dd>A nonzero vector whose direction a matrix doesn't change: $A\mathbf{v} = \lambda\mathbf{v}$.</dd>
+    <dt>Eigenvalue</dt><dd>The stretch factor $\lambda$ for an eigenvector.</dd>
+    <dt>Power iteration</dt><dd>Repeatedly multiplying by $A$ to find the top eigenvector.</dd>
+    <dt>SVD</dt><dd>$A = U\Sigma V^\top$: any matrix as rotate, stretch, rotate.</dd>
+    <dt>PCA</dt><dd>Finding the directions of greatest variation in data.</dd>
+  </dl>
+</section>
+
+<nav class="lesson-nav" aria-label="Lesson navigation">
+  <a class="nav-btn" href="module04.html"><small>Previous</small>← Module 4: Projections</a>
+  <a class="nav-btn next" href="module06.html"><small>Next</small>Module 6: Gradients →</a>
+</nav>
+
+</main></div>
+<footer>MathMatrix AI &nbsp;|&nbsp; Curriculum by Clark Ngo<br>Every worked example on this page was checked numerically.</footer>
+</body>
+</html>

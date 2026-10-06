@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Research &amp; Development Plan | MathMatrix AI</title>
+<meta name="description" content="Research and development plan for MathMatrix AI: research framework, a 10-module curriculum, AI feature specifications, architecture, and a gradient-descent prototype.">
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [["$", "$"], ["\\(", "\\)"]], displayMath: [["$$", "$$"], ["\\[", "\\]"]] },
+    svg: { fontCache: "global" },
+    options: { skipHtmlTags: ["script", "noscript", "style", "textarea", "pre", "code"] }
+  };
+</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg-full.min.js"></script>
+<style>
+  :root {
+    --bg: #f4f5fa; --surface: #ffffff; --surface2: #eceef8; --border: #d3d7ea;
+    --text: #12142b; --text-muted: #565b7c; --accent: #4338ca; --accent2: #3730a3;
+    --accent-light: #e8e7fb; --on-accent: #ffffff; --card-hover: #eeedfb;
+    --shadow: 0 2px 8px rgba(20,18,58,0.10); --shadow-hover: 0 8px 24px rgba(20,18,58,0.16);
+    --header-bg: #14123a; --header-text: #ffffff;
+    --hero-grad: linear-gradient(135deg, #14123a 0%, #2a2575 60%, #6a1b9a33 100%);
+    --code-bg: #eef0f9;
+    --tag-linalg: #1565c0; --tag-linalg-bg: #e3f0fd;
+    --tag-calc: #b45309; --tag-calc-bg: #fff3e0;
+    --tag-prob: #6a1b9a; --tag-prob-bg: #f3e5f5;
+    --tag-opt: #2e7d32; --tag-opt-bg: #e8f5e9;
+    --tag-model: #00796b; --tag-model-bg: #e0f2f1;
+  }
+  [data-theme="dark"] {
+    --bg: #0b0b1a; --surface: #14142b; --surface2: #1c1c3a; --border: #2c2c52;
+    --text: #e8e8f6; --text-muted: #9a9cc0; --accent: #a5b4fc; --accent2: #c7d2fe;
+    --accent-light: #1e1d45; --on-accent: #12124a; --card-hover: #1c1c3a;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40); --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #08081a; --header-text: #e8e8f6;
+    --hero-grad: linear-gradient(135deg, #08081a 0%, #1c1a52 60%, #ce93d822 100%);
+    --code-bg: #10102a;
+    --tag-linalg: #90caf9; --tag-linalg-bg: #0d1f35;
+    --tag-calc: #ffcc80; --tag-calc-bg: #2a1a00;
+    --tag-prob: #ce93d8; --tag-prob-bg: #1f0d2a;
+    --tag-opt: #a5d6a7; --tag-opt-bg: #0d2010;
+    --tag-model: #80cbc4; --tag-model-bg: #0d2520;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background 0.3s, color 0.3s; }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  .skip-link { position: absolute; left: -999px; top: auto; }
+  .skip-link:focus { position: fixed; left: 12px; top: 12px; z-index: 400; background: var(--accent); color: var(--on-accent); padding: 10px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; }
+  mjx-container { max-width: 100%; overflow-x: auto; overflow-y: hidden; }
+
+  header { background: var(--header-bg); color: var(--header-text); position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+  .header-inner { max-width: 1180px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .brand-icon { width: 40px; height: 40px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; color: var(--on-accent); flex-shrink: 0; letter-spacing: -0.5px; }
+  .brand-text h1 { font-size: 1rem; font-weight: 700; line-height: 1.2; }
+  .brand-text p { font-size: 0.74rem; opacity: 0.65; margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .back-pill, .theme-toggle { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: var(--header-text); cursor: pointer; padding: 7px 13px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; font-family: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; white-space: nowrap; }
+  .back-pill:hover, .theme-toggle:hover { background: rgba(255,255,255,0.22); }
+
+  .hero { background: var(--hero-grad); color: #fff; padding: 30px 24px; }
+  .hero-inner { max-width: 1180px; margin: 0 auto; }
+  .hero-tag { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); padding: 4px 10px; border-radius: 20px; margin-bottom: 12px; }
+  .hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; line-height: 1.25; }
+  .hero p { opacity: 0.85; font-size: 0.92rem; max-width: 74ch; line-height: 1.55; }
+
+  .page-shell { max-width: 1180px; margin: 0 auto; padding: 26px 24px 64px; display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 30px; align-items: start; }
+  .toc-sidebar { position: sticky; top: 82px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow); max-height: calc(100vh - 100px); overflow-y: auto; }
+  .toc-sidebar h5 { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin: 14px 0 6px; }
+  .toc-sidebar h5:first-child { margin-top: 0; }
+  .toc-sidebar ul { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+  .toc-sidebar a { display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); text-decoration: none; padding: 6px 8px; border-radius: 6px; }
+  .toc-sidebar a:hover, .toc-sidebar a.active { background: var(--surface2); color: var(--text); }
+
+  main.content { min-width: 0; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 600; color: var(--accent); text-decoration: none; margin-bottom: 18px; }
+  .back-link:hover { text-decoration: underline; }
+
+  .quickfacts { background: var(--surface); border: 2px solid var(--accent); border-radius: 14px; padding: 18px 20px; margin-bottom: 32px; box-shadow: var(--shadow); }
+  .quickfacts h4 { font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 12px; }
+  .fact-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+  .fact-tile { background: var(--surface2); border-radius: 10px; padding: 10px 12px; }
+  .fact-tile .fact-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 4px; }
+  .fact-tile .fact-value { font-size: 0.86rem; font-weight: 700; color: var(--text); line-height: 1.35; }
+
+  section.numsec { margin-bottom: 44px; padding-top: 8px; scroll-margin-top: 88px; }
+  .numsec-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+  .numsec-num { font-size: 0.78rem; font-weight: 800; color: var(--on-accent); background: var(--accent); border-radius: 8px; padding: 3px 9px; flex-shrink: 0; }
+  .numsec-head h3 { font-size: 1.2rem; font-weight: 800; }
+  .numsec p { font-size: 0.92rem; line-height: 1.7; color: var(--text-muted); margin-bottom: 14px; max-width: 82ch; }
+  .numsec p strong { color: var(--text); }
+  .numsec h4.sub-head { font-size: 0.95rem; font-weight: 800; margin: 22px 0 10px; color: var(--text); scroll-margin-top: 88px; }
+  .numsec ul.plain { margin: 0 0 14px 20px; display: flex; flex-direction: column; gap: 6px; max-width: 82ch; }
+  .numsec ul.plain li { font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); }
+  .numsec ul.plain li strong { color: var(--text); }
+
+  .concept-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin: 8px 0 14px; }
+  .concept-item { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); min-width: 0; }
+  .concept-item h4 { font-size: 0.86rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+  .concept-item p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0; }
+
+  .howto-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin: 6px 0 14px; }
+  .howto-list li { display: flex; gap: 12px; }
+  .howto-num { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--accent-light); color: var(--accent); font-weight: 800; font-size: 0.82rem; display: flex; align-items: center; justify-content: center; }
+  .howto-list p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.55; margin: 0; }
+  .howto-list strong { color: var(--text); }
+
+  .table-scroll { overflow-x: auto; border-radius: 10px; margin: 10px 0 14px; }
+  .cmp-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; background: var(--surface); }
+  .cmp-table th, .cmp-table td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; line-height: 1.5; }
+  .cmp-table th { background: var(--surface2); font-weight: 800; color: var(--text); }
+  .cmp-table td.attr { font-weight: 700; color: var(--accent); white-space: nowrap; }
+  .cmp-table td { color: var(--text-muted); }
+  .cmp-table td strong { color: var(--text); }
+
+  .module-card { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--surface); box-shadow: var(--shadow); margin-bottom: 14px; }
+  .module-band { padding: 10px 16px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .module-card.linalg .module-band { background: var(--tag-linalg-bg); color: var(--tag-linalg); }
+  .module-card.calc   .module-band { background: var(--tag-calc-bg); color: var(--tag-calc); }
+  .module-card.prob   .module-band { background: var(--tag-prob-bg); color: var(--tag-prob); }
+  .module-card.opt    .module-band { background: var(--tag-opt-bg); color: var(--tag-opt); }
+  .module-card.model  .module-band { background: var(--tag-model-bg); color: var(--tag-model); }
+  .module-card h5 { padding: 12px 16px 4px; font-size: 1rem; font-weight: 800; }
+  .module-rows { padding: 4px 16px 16px; display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); gap: 8px 14px; font-size: 0.84rem; line-height: 1.55; }
+  .module-rows dt { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); padding-top: 2px; }
+  .module-rows dd { color: var(--text-muted); min-width: 0; }
+  .module-rows dd.ai { color: var(--text); border-left: 3px solid var(--accent); padding-left: 8px; }
+
+  .feature-card { border: 1px solid var(--border); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); margin-bottom: 16px; overflow: hidden; }
+  .feature-head { background: var(--surface2); padding: 14px 18px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; border-bottom: 1px solid var(--border); }
+  .feature-letter { font-size: 0.78rem; font-weight: 800; color: var(--on-accent); background: var(--accent); border-radius: 8px; padding: 2px 8px; }
+  .feature-head h4 { font-size: 1rem; font-weight: 800; }
+  .feature-targets { font-size: 0.74rem; font-weight: 700; color: var(--text-muted); }
+  .feature-body { padding: 16px 18px; }
+  .feature-body > p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 14px; }
+  .two-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  .two-col h6 { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 6px; }
+  .two-col ul { margin-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+  .two-col li { font-size: 0.84rem; color: var(--text-muted); line-height: 1.5; }
+
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; overflow-x: auto; font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 0.8rem; line-height: 1.55; color: var(--text); margin: 10px 0 14px; }
+  code { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 0.86em; }
+  p code, li code, td code, dd code { background: var(--code-bg); border: 1px solid var(--border); padding: 0 4px; border-radius: 4px; }
+  .cm { color: var(--text-muted); }
+  .code-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 16px; }
+
+  .math-block { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 14px; margin: 8px 0 14px; overflow-x: auto; color: var(--text); }
+
+  .arch { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, .8fr); gap: 10px; align-items: stretch; margin: 10px 0 14px; }
+  .tier { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 12px; display: flex; flex-direction: column; gap: 8px; box-shadow: var(--shadow); min-width: 0; }
+  .tier > b { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+  .tier .box { background: var(--surface2); border-radius: 8px; padding: 7px 10px; font-size: 0.82rem; font-weight: 600; }
+  .tier .box small { display: block; font-weight: 400; color: var(--text-muted); font-size: 0.74rem; }
+  .arrow { align-self: center; color: var(--text-muted); font-size: 0.78rem; font-weight: 700; text-align: center; }
+
+  .roadmap { border-left: 3px solid var(--border); margin: 8px 0 14px 8px; }
+  .phase { position: relative; padding: 0 0 18px 20px; }
+  .phase::before { content: ""; position: absolute; left: -9px; top: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--surface); border: 3px solid var(--accent); }
+  .phase .when { font-size: 0.72rem; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+  .phase h5 { font-size: 0.95rem; font-weight: 800; margin: 2px 0 4px; }
+  .phase p { font-size: 0.85rem; margin-bottom: 2px; }
+  .phase .exit { font-size: 0.8rem; font-style: italic; }
+
+  .teaching-note { background: var(--surface2); border: 2px solid var(--accent); border-radius: 14px; padding: 16px 20px; margin: 6px 0 16px; }
+  .teaching-note h4 { font-size: 0.95rem; font-weight: 800; color: var(--accent); margin-bottom: 6px; }
+  .teaching-note p { font-size: 0.86rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 0; }
+
+  .sim-callout { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; background: var(--surface); border: 2px solid var(--tag-opt); border-radius: 14px; padding: 14px 18px; margin: 6px 0 16px; box-shadow: var(--shadow); }
+  .sim-callout p { margin: 0; font-size: 0.88rem; }
+  .btn { background: var(--accent); color: var(--on-accent); border: none; cursor: pointer; padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 0.87rem; font-family: inherit; text-decoration: none; display: inline-block; }
+  .btn:hover { background: var(--accent2); }
+
+  footer { text-align: center; padding: 20px; font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid var(--border); line-height: 1.6; }
+
+  @media (max-width: 900px) {
+    .page-shell { grid-template-columns: minmax(0, 1fr); }
+    .toc-sidebar { position: static; max-height: none; }
+    .arch { grid-template-columns: minmax(0, 1fr); }
+    .arrow { transform: rotate(90deg); }
+  }
+  @media (max-width: 620px) {
+    .header-inner { padding: 14px 16px; }
+    .hero { padding: 24px 16px; }
+    .page-shell { padding: 20px 16px 48px; }
+    .two-col { grid-template-columns: minmax(0, 1fr); }
+    .module-rows { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+    .module-rows dd { margin-bottom: 8px; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<header>
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="brand-icon">MM</div>
+      <div class="brand-text">
+        <h1>MathMatrix AI</h1>
+        <p>Research &amp; Development Plan</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <a class="back-pill" href="index.html">← Course Navigation</a>
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+    </div>
+  </div>
+</header>
+<div class="hero">
+  <div class="hero-inner">
+    <span class="hero-tag">Plan · v0.1 · Active WIP</span>
+    <h2>Research &amp; Development Plan</h2>
+    <p>How an AI-assisted, interactive curriculum can close the gap between the mathematics of data science and the machine learning built on it: the learning problems, the 10-module scope, four AI features, the architecture, and a working prototype.</p>
+  </div>
+</div>
+
+<div class="page-shell">
+  <nav class="toc-sidebar" aria-label="Page contents">
+    <h5>Research</h5>
+    <ul>
+      <li><a href="#sec-01">01 · Research Framework</a></li>
+      <li><a href="#sec-02">02 · Course Modules</a></li>
+    </ul>
+    <h5>Build</h5>
+    <ul>
+      <li><a href="#sec-03">03 · AI Feature Specs</a></li>
+      <li><a href="#sec-04">04 · Tech Stack</a></li>
+      <li><a href="#sec-05">05 · Prototype: Module 9</a></li>
+    </ul>
+    <h5>Delivery</h5>
+    <ul>
+      <li><a href="#sec-06">06 · Roadmap &amp; Risks</a></li>
+    </ul>
+  </nav>
+
+  <main class="content" id="main-content">
+    <a class="back-link" href="index.html">← Back to Course Navigation</a>
+
+    <div class="quickfacts">
+      <h4>Quick Facts</h4>
+      <div class="fact-grid">
+        <div class="fact-tile"><div class="fact-label">Scope</div><div class="fact-value">10 modules, linear algebra through probabilistic modeling</div></div>
+        <div class="fact-tile"><div class="fact-label">AI Features</div><div class="fact-value">Tutor, simulator coach, decomposition lens, hint ladder</div></div>
+        <div class="fact-tile"><div class="fact-label">Stack</div><div class="fact-value">Astro + React, Pyodide, FastAPI, Claude API</div></div>
+        <div class="fact-tile"><div class="fact-label">Prototype</div><div class="fact-value">Module 9: gradient descent</div></div>
+        <div class="fact-tile"><div class="fact-label">Study Design</div><div class="fact-value">Within-cohort A/B, 4 research questions</div></div>
+        <div class="fact-tile"><div class="fact-label">Author</div><div class="fact-value">Clark Ngo · updated 2026-10-05</div></div>
+      </div>
+    </div>
+
+    <!-- ===================== 01 ===================== -->
+    <section class="numsec" id="sec-01">
+      <div class="numsec-head"><span class="numsec-num">01</span><h3>Core Research Framework</h3></div>
+      <p>Most data-science learners can <em>run</em> <code>PCA().fit(X)</code> or <code>loss.backward()</code> well before they can say what those calls compute. The math is taught as symbol manipulation, and the ML is taught as API calls. Little connects the two. MathMatrix AI is built on one claim: <strong>the gap is about representation, not difficulty.</strong> Students rarely see one idea expressed at the same time as an equation, a picture, running code, and a model behavior.</p>
+
+      <h4 class="sub-head">Where students get stuck</h4>
+      <div class="table-scroll">
+        <table class="cmp-table">
+          <thead><tr><th>#</th><th>Friction point</th><th>What it looks like</th><th>Root cause</th></tr></thead>
+          <tbody>
+            <tr><td class="attr">F1</td><td><strong>Symbol–geometry disconnect</strong></td><td>Computes <code>A @ x</code> but can't predict what $A$ does to the unit square</td><td>Matrices taught as number grids, not transformations</td></tr>
+            <tr><td class="attr">F2</td><td><strong>Shape &amp; index blindness</strong></td><td>Gradient of $\mathbf{x}^\top A\mathbf{x}$ is a row vector one time, a column the next</td><td>Layout conventions are rarely stated</td></tr>
+            <tr><td class="attr">F3</td><td><strong>Decomposition as ritual</strong></td><td>Recites $A=U\Sigma V^\top$ but can't say why truncated SVD is the best rank-$k$ approximation</td><td>Decompositions taught as algorithms, not changes of basis</td></tr>
+            <tr><td class="attr">F4</td><td><strong>Gradient opacity</strong></td><td>Backprop feels like magic; can't debug vanishing gradients</td><td>The chain rule is never shown on a computational graph</td></tr>
+            <tr><td class="attr">F5</td><td><strong>Conditional inversion</strong></td><td>Confuses $p(A\mid B)$ with $p(B\mid A)$; ignores base rates</td><td>Bayes taught as a formula without area or frequency intuition</td></tr>
+            <tr><td class="attr">F6</td><td><strong>Distribution abstraction</strong></td><td>Can't link $\Sigma$ to a point cloud's shape; Jacobians feel arbitrary</td><td>Gaussians shown as formulas, not transformed spheres</td></tr>
+            <tr><td class="attr">F7</td><td><strong>Optimization black box</strong></td><td>Picks learning rates at random</td><td>Convergence theory and tuning live in separate courses</td></tr>
+            <tr><td class="attr">F8</td><td><strong>Hidden modeling assumptions</strong></td><td>Doesn't see least squares as Gaussian MLE, or ridge as MAP</td><td>The two views of one model are never side by side</td></tr>
+            <tr><td class="attr">F9</td><td><strong>Feedback latency</strong></td><td>A wrong derivation gets noticed days later, or never</td><td>Step-level feedback doesn't scale with instructors alone</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 class="sub-head">Theoretical grounding</h4>
+      <div class="concept-grid">
+        <div class="concept-item"><h4>Multiple linked representations</h4><p>Ainsworth: changing one view (a matrix entry) immediately updates the others (equation, plot, code). Targets F1, F3, F6.</p></div>
+        <div class="concept-item"><h4>Cognitive load theory</h4><p>Sweller: worked examples and faded scaffolding shape the step-by-step derivation engine.</p></div>
+        <div class="concept-item"><h4>Self-explanation effect</h4><p>Chi et al.: the tutor asks students to explain a step before it explains it.</p></div>
+        <div class="concept-item"><h4>Productive failure</h4><p>Kapur: modules open with an attempt before instruction, such as tuning a learning rate by hand.</p></div>
+        <div class="concept-item"><h4>Bloom's 2-sigma problem</h4><p>LLM tutors approximate one-on-one tutoring only if their math is verified, so every AI feature has a verification layer.</p></div>
+      </div>
+
+      <h4 class="sub-head">How AI-assisted interactivity addresses each one</h4>
+      <div class="table-scroll">
+        <table class="cmp-table">
+          <thead><tr><th>Targets</th><th>Intervention</th><th>The AI's role</th></tr></thead>
+          <tbody>
+            <tr><td class="attr">F1 F3</td><td>Linked-representation visualizers</td><td>Narrates what changed in the current state, e.g. "$a_{12}=a_{21}$ now, so the eigenvectors became orthogonal"</td></tr>
+            <tr><td class="attr">F2</td><td>Shape-annotated derivation stepper</td><td>Generates derivations; SymPy checks every step; the UI flags shape mismatches</td></tr>
+            <tr><td class="attr">F4</td><td>Computational-graph backprop stepper</td><td>Asks the student to predict the next local gradient before revealing it</td></tr>
+            <tr><td class="attr">F5</td><td>Natural-frequency Bayes grids</td><td>Detects conditional inversion in free-text answers</td></tr>
+            <tr><td class="attr">F6</td><td>Covariance sculptor and density-warp sandbox</td><td>Explains the Jacobian term for the student's own map</td></tr>
+            <tr><td class="attr">F7</td><td>Gradient-descent flight simulator</td><td>Diagnoses the trajectory and links it to $\eta\lambda_{\max}$</td></tr>
+            <tr><td class="attr">F8</td><td>Dual-view model cards</td><td>Turns a chosen prior or noise model into the equivalent regularizer</td></tr>
+            <tr><td class="attr">F9</td><td>Instant-feedback notebooks</td><td>Graduated hints grounded in the failing test, never the full answer first</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 class="sub-head">Research questions</h4>
+      <ol class="howto-list">
+        <li><span class="howto-num">1</span><p><strong>Conceptual transfer.</strong> Do linked interactive representations with AI narration produce larger concept-inventory gains than static text with the same exercises?</p></li>
+        <li><span class="howto-num">2</span><p><strong>Tutor design.</strong> Does a Socratic, hint-first tutor beat an answer-first tutor on delayed post-tests, at the cost of more time on task?</p></li>
+        <li><span class="howto-num">3</span><p><strong>Verification.</strong> Does CAS-backed checking keep student-facing math errors under 1% of claims, and does a visible "verified" label change trust and learning?</p></li>
+        <li><span class="howto-num">4</span><p><strong>Bridging.</strong> Do math-to-ML labs (e.g., PCA from the SVD) improve students' ability to debug real ML code?</p></li>
+      </ol>
+
+      <h4 class="sub-head">Study design</h4>
+      <ul class="plain">
+        <li><strong>Design:</strong> student-level A/B randomization within cohorts, with features toggled by flag; crossover where modules are independent.</li>
+        <li><strong>Instruments:</strong> per-module pre/post concept inventories (8–12 misconception-based items), a delayed post-test at 3–4 weeks, a transfer task (debug a broken ML notebook), and process data such as hint depth, simulator parameters explored, and tutor turns.</li>
+        <li><strong>Analysis:</strong> mixed-effects models with student and module random effects; normalized gain $g = \frac{\text{post}-\text{pre}}{100-\text{pre}}$.</li>
+        <li><strong>Ethics:</strong> IRB approval before identifiable data; opt-in dialogue logging; PII removed before any LLM call; a visible "AI may be wrong" notice with a way to report errors.</li>
+      </ul>
+    </section>
+
+    <!-- ===================== 02 ===================== -->
+    <section class="numsec" id="sec-02">
+      <div class="numsec-head"><span class="numsec-num">02</span><h3>Course Modules &amp; Mathematical Scope</h3></div>
+      <p>Every module runs the same five-part lesson loop, so students learn the rhythm once and spend their attention on the math.</p>
+      <ol class="howto-list">
+        <li><span class="howto-num">1</span><p><strong>Try first.</strong> An interactive task before any instruction.</p></li>
+        <li><span class="howto-num">2</span><p><strong>Concept.</strong> Short text and LaTeX linked to a live visual.</p></li>
+        <li><span class="howto-num">3</span><p><strong>Derive.</strong> A key result step by step, with AI-checked explanations.</p></li>
+        <li><span class="howto-num">4</span><p><strong>Code lab.</strong> Build it in NumPy in the browser, then compare to the library.</p></li>
+        <li><span class="howto-num">5</span><p><strong>ML bridge.</strong> The same idea inside a real model, then a misconception quiz.</p></li>
+      </ol>
+
+      <div class="module-card linalg">
+        <div class="module-band"><span>Module 1 · Linear Algebra</span><span>Starting point</span></div>
+        <h5>Systems of Linear Equations &amp; Matrix Operations</h5>
+        <dl class="module-rows">
+          <dt>Core math</dt><dd>$A\mathbf{x}=\mathbf{b}$; Gaussian elimination; row-echelon form; general solution = particular + homogeneous; product as composition; $(AB)^{-1}=B^{-1}A^{-1}$</dd>
+          <dt>Misconceptions</dt><dd>$AB=BA$; $(A+B)^{-1}=A^{-1}+B^{-1}$</dd>
+          <dt>Interactive visual</dt><dd>Plane-intersection explorer: row operations animate while the solution set stays fixed</dd>
+          <dt>Code lab</dt><dd>Gaussian elimination with partial pivoting vs. <code>np.linalg.solve</code></dd>
+          <dt>ML bridge</dt><dd>Normal equations $X^\top X\boldsymbol\theta = X^\top\mathbf{y}$</dd>
+          <dt>AI touchpoint</dt><dd class="ai">Row-reduction checker flags the first invalid step and explains why it changes the solution set</dd>
+        </dl>
+      </div>
+
+      <div class="module-card linalg">
+        <div class="module-band"><span>Module 2 · Linear Algebra</span><span>Builds on M1</span></div>
+        <h5>Vector Spaces, Basis, Rank &amp; Linear Mappings</h5>
+        <dl class="module-rows">
+          <dt>Core math</dt><dd>Subspaces; span; independence; basis and dimension; kernel and image; rank–nullity $\dim\ker\Phi+\operatorname{rk}\Phi=n$; change of basis $\tilde A=T^{-1}AS$</dd>
+          <dt>Misconceptions</dt><dd>A basis is unique; rank counts nonzero entries</dd>
+          <dt>Interactive visual</dt><dd>Span explorer (line → plane → space) and a kernel-collapse animation</dd>
+          <dt>Code lab</dt><dd>Rank by elimination vs. tolerance-based <code>matrix_rank</code>; a kernel basis</dd>
+          <dt>ML bridge</dt><dd>Multicollinearity and the one-hot dummy-variable trap</dd>
+          <dt>AI touchpoint</dt><dd class="ai">"Is it a basis?" challenge with probing questions about span and independence</dd>
+        </dl>
+      </div>
+
+      <div class="module-card linalg">
+        <div class="module-band"><span>Module 3 · Analytic Geometry</span><span>Builds on M2</span></div>
+        <h5>Norms, Inner Products &amp; Orthogonality</h5>
+        <dl class="module-rows">
+          <dt>Core math</dt><dd>$\ell_1,\ell_2,\ell_\infty$ norms; $\langle\mathbf{x},\mathbf{y}\rangle=\mathbf{x}^\top A\mathbf{y}$ with $A\succ0$; Cauchy–Schwarz; angles; orthogonal matrices $Q^\top Q=I$</dd>
+          <dt>Misconceptions</dt><dd>Orthogonal always means dot product zero; every norm comes from an inner product</dd>
+          <dt>Interactive visual</dt><dd>Unit-ball morpher for $p\in[1,\infty]$; editable inner product turns the unit circle into an ellipse</dd>
+          <dt>Code lab</dt><dd>Cosine similarity on text embeddings</dd>
+          <dt>ML bridge</dt><dd>Why the $\ell_1$ ball's corners make Lasso sparse; kernels as inner products</dd>
+          <dt>AI touchpoint</dt><dd class="ai">"Explain the corner": the student explains Lasso sparsity, graded against a rubric</dd>
+        </dl>
+      </div>
+
+      <div class="module-card linalg">
+        <div class="module-band"><span>Module 4 · Analytic Geometry</span><span>Builds on M3</span></div>
+        <h5>Orthonormal Basis &amp; Orthogonal Projections</h5>
+        <dl class="module-rows">
+          <dt>Core math</dt><dd>Gram–Schmidt; $\pi_U(\mathbf{x})=B(B^\top B)^{-1}B^\top\mathbf{x}$; $P^2=P=P^\top$; with an orthonormal basis $P=BB^\top$; QR</dd>
+          <dt>Misconceptions</dt><dd>Projection is scaling; the residual can point anywhere</dd>
+          <dt>Interactive visual</dt><dd>Shadow projector with the residual locked at 90°; Gram–Schmidt stepper</dd>
+          <dt>Code lab</dt><dd>Classical vs. modified Gram–Schmidt; measure $\lVert Q^\top Q-I\rVert$</dd>
+          <dt>ML bridge</dt><dd>Least squares is a projection: the hat matrix $X(X^\top X)^{-1}X^\top$</dd>
+          <dt>AI touchpoint</dt><dd class="ai">Derive the normal equations from $X^\top(\mathbf{y}-X\boldsymbol\theta)=\mathbf{0}$</dd>
+        </dl>
+      </div>
+
+      <div class="module-card linalg">
+        <div class="module-band"><span>Module 5 · Decompositions</span><span>Builds on M2, M4</span></div>
+        <h5>Determinants, Eigenvalues &amp; Eigenvectors</h5>
+        <dl class="module-rows">
+          <dt>Core math</dt><dd>Determinant as volume scaling; $\det(A-\lambda I)=0$; $A=PDP^{-1}$; spectral theorem $A=Q\Lambda Q^\top$; Cholesky $LL^\top$; SVD $U\Sigma V^\top$; Eckart–Young</dd>
+          <dt>Misconceptions</dt><dd>Every matrix is diagonalizable; singular values equal eigenvalues</dd>
+          <dt>Interactive visual</dt><dd>Matrix Decomposition Lens (Feature C)</dd>
+          <dt>Code lab</dt><dd>Power iteration; SVD image compression; PCA from the SVD of centered data</dd>
+          <dt>ML bridge</dt><dd>PCA, PageRank, whitening, low-rank recommenders</dd>
+          <dt>AI touchpoint</dt><dd class="ai">"Predict the eigenvectors": sketch a guess, then compare to the truth</dd>
+        </dl>
+      </div>
+
+      <div class="module-card calc">
+        <div class="module-band"><span>Module 6 · Vector Calculus</span><span>Builds on M1</span></div>
+        <h5>Partial Differentiation &amp; Vector Gradients</h5>
+        <dl class="module-rows">
+          <dt>Core math</dt><dd>Gradient; Jacobian; chain rule; $\nabla_{\mathbf{x}}(\mathbf{x}^\top A\mathbf{x})=(A+A^\top)\mathbf{x}$; $\nabla_{\mathbf{x}}\lVert A\mathbf{x}-\mathbf{b}\rVert^2=2A^\top(A\mathbf{x}-\mathbf{b})$; Hessian; reverse-mode autodiff</dd>
+          <dt>Misconceptions</dt><dd>Gradient shape matches the output; chain-rule order doesn't matter</dd>
+          <dt>Interactive visual</dt><dd>Gradient field over contours; backprop stepper on a computational graph</dd>
+          <dt>Code lab</dt><dd>Finite-difference gradient checker; a ~60-line scalar autodiff</dd>
+          <dt>ML bridge</dt><dd>Backprop in a 2-layer MLP; vanishing gradients</dd>
+          <dt>AI touchpoint</dt><dd class="ai">Shape-annotated derivation stepper with SymPy checking each step</dd>
+        </dl>
+      </div>
+
+      <div class="module-card prob">
+        <div class="module-band"><span>Module 7 · Probability</span><span>Independent entry point</span></div>
+        <h5>Probability Spaces, Rules &amp; Bayes' Theorem</h5>
+        <dl class="module-rows">
+          <dt>Core math</dt><dd>Sum and product rules; $p(\theta\mid\mathbf{x})=\frac{p(\mathbf{x}\mid\theta)p(\theta)}{p(\mathbf{x})}$; independence; expectation, variance, covariance</dd>
+          <dt>Misconceptions</dt><dd>$p(A\mid B)=p(B\mid A)$; base-rate neglect; uncorrelated implies independent</dd>
+          <dt>Interactive visual</dt><dd>1000-person natural-frequency grid with prevalence and test-accuracy sliders</dd>
+          <dt>Code lab</dt><dd>Monte Carlo check of Bayes; Naive Bayes spam filter from counts</dd>
+          <dt>ML bridge</dt><dd>Naive Bayes; calibration; posterior as belief update</dd>
+          <dt>AI touchpoint</dt><dd class="ai">Muddiest Point tutor tuned to catch conditional inversion</dd>
+        </dl>
+      </div>
+
+      <div class="module-card prob">
+        <div class="module-band"><span>Module 8 · Probability</span><span>Builds on M5, M6, M7</span></div>
+        <h5>Gaussian Distributions &amp; Change of Variables</h5>
+        <dl class="module-rows">
+          <dt>Core math</dt><dd>$\mathcal N(\boldsymbol\mu,\Sigma)$; Gaussian marginals and conditionals; $A\mathbf{x}+\mathbf{b}\sim\mathcal N(A\boldsymbol\mu+\mathbf{b},A\Sigma A^\top)$; $p_Y(\mathbf{y})=p_X(g^{-1}(\mathbf{y}))\,\lvert\det J_{g^{-1}}(\mathbf{y})\rvert$</dd>
+          <dt>Misconceptions</dt><dd>Ellipse axes align with coordinates; the Jacobian can be dropped</dd>
+          <dt>Interactive visual</dt><dd>Covariance-ellipse sculptor; conditional slicer; nonlinear density warp</dd>
+          <dt>Code lab</dt><dd>Sample correlated Gaussians via Cholesky; check change of variables with histograms</dd>
+          <dt>ML bridge</dt><dd>Gaussian processes, the VAE reparameterization trick, normalizing flows</dd>
+          <dt>AI touchpoint</dt><dd class="ai">Explains the Jacobian for the student's chosen transform, checked by CAS</dd>
+        </dl>
+      </div>
+
+      <div class="module-card opt">
+        <div class="module-band"><span>Module 9 · Optimization</span><span>Builds on M5, M6 · prototype</span></div>
+        <h5>Continuous Optimization &amp; Gradient Descent</h5>
+        <dl class="module-rows">
+          <dt>Core math</dt><dd>$\mathbf{x}_{k+1}=\mathbf{x}_k-\eta\nabla f(\mathbf{x}_k)$; $0&lt;\eta&lt;2/\lambda_{\max}$; condition number $\kappa$; momentum; SGD; Lagrange multipliers; convexity; duality</dd>
+          <dt>Misconceptions</dt><dd>A larger learning rate is always faster; the gradient points at the minimum</dd>
+          <dt>Interactive visual</dt><dd><a href="sim-gradient-descent.html">Gradient Descent Flight Simulator</a> (live prototype)</dd>
+          <dt>Code lab</dt><dd>GD, momentum, and SGD from scratch; measured vs. theoretical rate</dd>
+          <dt>ML bridge</dt><dd>Training loops, learning-rate schedules, and why feature scaling helps</dd>
+          <dt>AI touchpoint</dt><dd class="ai">Trajectory-diagnosis coach with structured output</dd>
+        </dl>
+      </div>
+
+      <div class="module-card model">
+        <div class="module-band"><span>Module 10 · Capstone</span><span>Builds on M4, M8, M9</span></div>
+        <h5>Probabilistic Modeling, Parameter Estimation &amp; Graphical Models</h5>
+        <dl class="module-rows">
+          <dt>Core math</dt><dd>MLE and MAP; least squares = Gaussian-noise MLE; ridge = Gaussian-prior MAP with $\lambda=\sigma^2/b^2$; Bayesian linear regression; $p(\mathbf{x})=\prod_k p(x_k\mid\mathrm{Pa}_k)$; d-separation; EM for GMMs</dd>
+          <dt>Misconceptions</dt><dd>MLE always generalizes; priors are cheating; arrows mean causation</dd>
+          <dt>Interactive visual</dt><dd>Dual-view model card; Bayesian regression animator; DAG builder</dd>
+          <dt>Code lab</dt><dd>Linear regression three ways (MLE, MAP, Bayesian); EM for a 2-component GMM</dd>
+          <dt>ML bridge</dt><dd>Regularization as prior; uncertainty quantification</dd>
+          <dt>AI touchpoint</dt><dd class="ai">Capstone tutor helps build a graphical model for the student's own dataset</dd>
+        </dl>
+      </div>
+    </section>
+
+    <!-- ===================== 03 ===================== -->
+    <section class="numsec" id="sec-03">
+      <div class="numsec-head"><span class="numsec-num">03</span><h3>Interactive AI Feature Specifications</h3></div>
+      <p>Four rules apply to every AI feature.</p>
+      <div class="concept-grid">
+        <div class="concept-item"><h4>Ground, then generate</h4><p>The model always gets the module's knowledge pack and the live state of the page.</p></div>
+        <div class="concept-item"><h4>Verify the math</h4><p>Symbolic claims go through SymPy; numbers are computed in the browser.</p></div>
+        <div class="concept-item"><h4>Hint before answer</h4><p>Socratic by default; full solutions unlock after attempts.</p></div>
+        <div class="concept-item"><h4>One notation</h4><p>Column vectors, numerator-layout Jacobians, $\boldsymbol\theta$ for parameters, everywhere.</p></div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-head"><span class="feature-letter">A</span><h4>"Muddiest Point" Clarifier</h4><span class="feature-targets">Targets F2 · F4 · F5 · F8 · F9</span></div>
+        <div class="feature-body">
+          <p>At the end of each section the student writes what confused them most. The tutor matches it to a known misconception, asks one probing question, explains using the page's visual, then checks understanding.</p>
+          <div class="two-col">
+            <div><h6>Interface</h6><ul>
+              <li>Slide-over panel from a "Still muddy?" button or a text selection</li>
+              <li>Streaming replies with live math rendering</li>
+              <li>"Show me" buttons that set the page's visual to a specific state</li>
+              <li>A verified badge on CAS-checked equations</li>
+              <li>Screen-reader math and full keyboard support</li>
+            </ul></div>
+            <div><h6>Prompt strategy</h6><ul>
+              <li>Layered system prompt: teaching contract → notation → knowledge pack → misconception taxonomy, all cached; page state goes in the user turn</li>
+              <li>Diagnose → probe → explain → check</li>
+              <li>Tools: <code>check_equivalence</code> (SymPy) and <code>set_visual_state</code></li>
+              <li>Won't solve graded items; hands off to the instructor after 3 unresolved loops</li>
+            </ul></div>
+          </div>
+          <div class="code-label">System prompt sketch</div>
+          <pre>You are the MathMatrix AI tutor for Module {module_id}: {module_title}.
+
+Teaching contract:
+- Diagnose before you explain. Match the student's confusion to an entry in
+  &lt;misconceptions&gt;. If unsure which one, ask ONE short probing question first.
+- Prefer the student's own reasoning: ask them to predict or explain a step
+  before you reveal it.
+- Tie every explanation to the interactive visual on the page. When a specific
+  configuration would make the point, offer it with the set_visual_state tool.
+- Before stating any algebraic identity or derivative, verify it with
+  check_equivalence. If verification fails, say so and fix it.
+- Write math in LaTeX. Keep replies under ~150 words unless asked for more.
+- End with one short check-for-understanding question.</pre>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-head"><span class="feature-letter">B</span><h4>Gradient Descent Flight Simulator + AI Coach</h4><span class="feature-targets">Targets F7 · F4</span></div>
+        <div class="feature-body">
+          <p>Students fly an optimizer over a loss surface, tuning learning rate, momentum, and conditioning, and see each choice tied back to theory.</p>
+          <div class="two-col">
+            <div><h6>Interface</h6><ul>
+              <li>Contour plots: rotated quadratic, Rosenbrock, Himmelblau, saddle, noisy logistic loss</li>
+              <li>Controls for $\eta$ (log scale), momentum, $\kappa$, optimizer, and start point</li>
+              <li>Theory overlay marking $2/\lambda_{\max}$ and $\eta^\star$ on the slider</li>
+              <li>Challenge mode: reach the minimum within 30 steps</li>
+            </ul></div>
+            <div><h6>Prompt strategy</h6><ul>
+              <li>The browser computes the facts (eigenvalues, $\eta\lambda_{\max}$, loss ratios, oscillation counts); the model only interprets them</li>
+              <li>Structured JSON output: regime, evidence, theory link, suggested experiment, question</li>
+              <li>One few-shot example per regime</li>
+            </ul></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-head"><span class="feature-letter">C</span><h4>Matrix Decomposition Lens</h4><span class="feature-targets">Targets F1 · F3 · F6</span></div>
+        <div class="feature-body">
+          <p>LU, QR, eigendecomposition, Cholesky, and SVD as animated geometry: each factor is one step in a sequence of transformations applied to the unit grid.</p>
+          <div class="two-col">
+            <div><h6>Interface</h6><ul>
+              <li>Drag basis vectors or type a 2×2 / 3×3 matrix</li>
+              <li>Timeline scrubber: $V^\top$ rotate → $\Sigma$ scale → $U$ rotate</li>
+              <li>Factors, animation, and runnable NumPy side by side</li>
+              <li>Live badges: symmetric, orthogonal, SPD, defective, rank, $\det$, $\kappa$</li>
+              <li>Edge-case gallery: rotation, shear, projection, reflection</li>
+            </ul></div>
+            <div><h6>Prompt strategy</h6><ul>
+              <li>Facts in, narrative out: NumPy computes every number into a fact sheet</li>
+              <li>The model may cite only numbers that appear in the fact sheet</li>
+              <li>One or two sentences per animation step, kept in sync with the scrubber</li>
+              <li>An automatic check confirms every number in the narration; otherwise regenerate</li>
+            </ul></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-head"><span class="feature-letter">D</span><h4>Notebook Copilot with a Hint Ladder</h4><span class="feature-targets">Targets F9 and every code lab</span></div>
+        <div class="feature-body">
+          <p>In-browser Python labs with hidden tests. When a test fails, the copilot gives graduated hints grounded in the failing assertion.</p>
+          <div class="two-col">
+            <div><h6>Interface</h6><ul>
+              <li>Code cells with tests running in a Web Worker, no server needed</li>
+              <li>Expected vs. actual, with a shape diff such as <code>(3, 1)</code> vs. <code>(3,)</code></li>
+              <li>Four rungs: nudge → pointer → analogous example → walkthrough</li>
+              <li>Instructor dashboard showing hint depth per exercise</li>
+            </ul></div>
+            <div><h6>Prompt strategy</h6><ul>
+              <li>The reference solution goes only to the grader, never to the hint prompt for rungs 1–3</li>
+              <li>Rung-specific instructions; never a full corrected function before rung 4</li>
+            </ul></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 04 ===================== -->
+    <section class="numsec" id="sec-04">
+      <div class="numsec-head"><span class="numsec-num">04</span><h3>Implementation Tech Stack &amp; Architecture</h3></div>
+      <div class="table-scroll">
+        <table class="cmp-table">
+          <thead><tr><th>Layer</th><th>Choice</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td class="attr">Site</td><td><strong>Astro</strong> + MDX</td><td>Static-first, fits GitHub Pages, interactive islands only where needed</td></tr>
+            <tr><td class="attr">Islands</td><td><strong>React</strong> + TypeScript, <strong>Tailwind</strong></td><td>Mature ecosystem, consistent design tokens</td></tr>
+            <tr><td class="attr">Math</td><td><strong>KaTeX</strong> at build time</td><td>Fast; client-side for streamed tutor replies</td></tr>
+            <tr><td class="attr">Visuals</td><td><strong>Mafs</strong>, <strong>D3</strong>, <strong>Plotly</strong></td><td>Coordinate-plane interactives, custom charts, 3D surfaces</td></tr>
+            <tr><td class="attr">Python</td><td><strong>Pyodide</strong> (WebAssembly) with NumPy, SymPy, SciPy</td><td>Notebook labs and number crunching without a server</td></tr>
+            <tr><td class="attr">AI service</td><td><strong>FastAPI</strong> on Cloud Run or Fly.io</td><td>A static site can't hold API keys; Python gives native SymPy</td></tr>
+            <tr><td class="attr">LLM</td><td><strong>Claude API</strong> (<code>claude-opus-5-5</code>) via the <code>anthropic</code> SDK</td><td>Math reasoning, tool use, structured outputs, prompt caching</td></tr>
+            <tr><td class="attr">Data</td><td><strong>Supabase</strong> (Postgres + Auth)</td><td>Accounts, progress, consent flags, research event log</td></tr>
+            <tr><td class="attr">Testing</td><td>Vitest, Playwright, pytest, LLM eval suite</td><td>UI, backend, and tutor quality gates</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="teaching-note">
+        <h4>Fast pilots</h4>
+        <p>Individual modules can be prototyped in Streamlit or Jupyter + Voilà in days. The ones that work get ported to Astro islands.</p>
+      </div>
+
+      <h4 class="sub-head">Architecture</h4>
+      <div class="arch" role="img" aria-label="Architecture: the static site in the browser talks to a FastAPI service, which calls the Claude API; both log to Supabase.">
+        <div class="tier"><b>Browser · GitHub Pages</b>
+          <div class="box">Astro MDX lessons<small>math pre-rendered</small></div>
+          <div class="box">React visual islands<small>Mafs · D3 · Plotly</small></div>
+          <div class="box">Pyodide Web Worker<small>NumPy · SymPy · tests</small></div>
+          <div class="box">Tutor panel<small>streaming + math</small></div>
+        </div>
+        <div class="arrow">SSE / JSON →</div>
+        <div class="tier"><b>AI service · FastAPI</b>
+          <div class="box">Auth · rate limit · PII scrub</div>
+          <div class="box">Module knowledge packs</div>
+          <div class="box">Claude client<small>caching · tools · schemas</small></div>
+          <div class="box">SymPy verifier<small>sandboxed subprocess</small></div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="tier"><b>External</b>
+          <div class="box">Claude API</div>
+          <div class="box">Supabase<small>progress · consent · events</small></div>
+        </div>
+      </div>
+
+      <h4 class="sub-head">Proposed repository layout</h4>
+      <pre>math-matrix-ai/
+├── site/                     <span class="cm"># Astro app → GitHub Pages</span>
+│   ├── src/content/modules/  <span class="cm"># m01-linear-systems.mdx … m10-probabilistic-modeling.mdx</span>
+│   └── src/components/       <span class="cm"># viz/, tutor/, notebook/</span>
+├── api/                      <span class="cm"># FastAPI service</span>
+│   ├── app/tutor.py          <span class="cm"># Claude calls</span>
+│   ├── app/verify.py         <span class="cm"># SymPy tool (sandboxed)</span>
+│   └── knowledge/            <span class="cm"># per-module knowledge packs and misconception taxonomies</span>
+├── evals/                    <span class="cm"># tutor eval sets</span>
+└── research/                 <span class="cm"># instruments, analysis notebooks, IRB documents</span></pre>
+    </section>
+
+    <!-- ===================== 05 ===================== -->
+    <section class="numsec" id="sec-05">
+      <div class="numsec-head"><span class="numsec-num">05</span><h3>Prototype Module: Gradient Descent</h3></div>
+      <p>Module 9 is the first vertical slice. It exercises every layer: LaTeX lesson content, Python that runs in the browser, an interactive visual, and two AI endpoints.</p>
+
+      <h4 class="sub-head">The mathematics</h4>
+      <p>Near a minimum every smooth loss looks like a quadratic, so that is the model problem:</p>
+      <div class="math-block">$$f(\mathbf{x})=\tfrac12\,\mathbf{x}^\top A\,\mathbf{x}-\mathbf{b}^\top\mathbf{x},\qquad A=A^\top\succ0,\qquad \nabla f(\mathbf{x})=A\mathbf{x}-\mathbf{b},\qquad \mathbf{x}^\star=A^{-1}\mathbf{b}.$$</div>
+      <p>With error $\mathbf{e}_k=\mathbf{x}_k-\mathbf{x}^\star$, one step gives $\mathbf{e}_{k+1}=(I-\eta A)\,\mathbf{e}_k$. In the eigenbasis each component scales by $(1-\eta\lambda_i)$, so gradient descent converges exactly when</p>
+      <div class="math-block">$$0<\eta<\frac{2}{\lambda_{\max}},\qquad \eta^\star=\frac{2}{\lambda_{\min}+\lambda_{\max}},\qquad \lVert\mathbf{e}_{k+1}\rVert\le\frac{\kappa-1}{\kappa+1}\lVert\mathbf{e}_k\rVert,\quad \kappa=\frac{\lambda_{\max}}{\lambda_{\min}}.$$</div>
+      <div class="teaching-note">
+        <h4>The takeaway for students</h4>
+        <p>The steepest direction sets the learning-rate ceiling, and the flattest direction sets the speed. When $\kappa$ is large, the step that keeps the steep direction stable is slow in the flat direction, and the path zig-zags. This links Module 5 (eigenvalues) to Module 9 (optimization) to practice (feature scaling).</p>
+      </div>
+      <div class="sim-callout">
+        <p><strong>Try it:</strong> the simulator runs this exact quadratic. Push $\eta$ past $0.2$ and watch it diverge.</p>
+        <a class="btn" href="sim-gradient-descent.html">Open the simulator →</a>
+      </div>
+
+      <h4 class="sub-head">Python (runs in Pyodide and in the code lab)</h4>
+      <pre>import numpy as np
+
+def make_quadratic(lam_min=1.0, lam_max=10.0, theta=np.pi / 6):
+    R = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+    A = R @ np.diag([lam_min, lam_max]) @ R.T
+    b = np.array([1.0, 1.0])
+    return A, b, (lambda x: A @ x - b)
+
+def gradient_descent(grad, x0, lr, momentum=0.0, steps=100, tol=1e-8):
+    x, v = np.asarray(x0, float), np.zeros(2)
+    path = [x.copy()]
+    for _ in range(steps):
+        g = grad(x)
+        if np.linalg.norm(g) &lt; tol:
+            break
+        v = momentum * v - lr * g          <span class="cm"># heavy-ball momentum</span>
+        x = x + v
+        path.append(x.copy())
+    return np.array(path)
+
+A, b, grad = make_quadratic()
+x_star = np.linalg.solve(A, b)
+for lr in [0.05, 0.182, 0.19, 0.21]:
+    p = gradient_descent(grad, np.array([-2.0, 2.0]), lr)
+    print(f"lr={lr:.3f}: final error={np.linalg.norm(p[-1] - x_star):.2e}")</pre>
+      <pre><span class="cm"># verified output (κ = 10, η_max = 0.200, η* = 0.182)</span>
+lr=0.050: final error=1.24e-02   <span class="cm"># too timid: slow in the flat direction</span>
+lr=0.182: final error=6.58e-09   <span class="cm"># optimal fixed step</span>
+lr=0.190: final error=7.16e-05   <span class="cm"># near the ceiling: oscillates, still converges</span>
+lr=0.210: final error=3.71e+04   <span class="cm"># 5% past 2/λ_max: diverges</span></pre>
+
+      <h4 class="sub-head">SymPy verification tool</h4>
+      <p>Every algebraic claim the tutor makes can be checked with this tool. <code>parse_expr</code> uses <code>eval</code> internally, so it must run in a sandbox: a subprocess with limits, or the Pyodide worker.</p>
+      <pre><span class="cm"># api/app/verify.py</span>
+import json, sympy as sp
+from sympy.parsing.sympy_parser import (
+    parse_expr, standard_transformations, implicit_multiplication_application)
+
+TRANSFORMS = standard_transformations + (implicit_multiplication_application,)
+SYMPY_NS: dict = {}
+exec("from sympy import *", SYMPY_NS)
+
+def check_equivalence(lhs: str, rhs: str, variables: str) -&gt; str:
+    syms = {v.strip(): sp.Symbol(v.strip(), real=True) for v in variables.split(",") if v.strip()}
+    try:
+        a = parse_expr(lhs, local_dict=dict(syms), global_dict=SYMPY_NS, transformations=TRANSFORMS)
+        b = parse_expr(rhs, local_dict=dict(syms), global_dict=SYMPY_NS, transformations=TRANSFORMS)
+    except Exception as e:
+        return json.dumps({"status": "parse_error", "detail": str(e)})
+    diff = sp.simplify(a - b)
+    return json.dumps({"status": "equivalent" if diff == 0 else "not_equivalent",
+                       "difference": str(diff)})
+
+<span class="cm"># check_equivalence("(x+y)**2", "x**2+y**2", "x,y")
+#   -&gt; {"status": "not_equivalent", "difference": "2*x*y"}</span></pre>
+
+      <h4 class="sub-head">Streaming tutor endpoint</h4>
+      <p>The stable prompt layers come first and are cached, so repeat questions on a module reuse them. Page state goes in the user turn. Server-side fallbacks retry automatically if the model declines a request.</p>
+      <pre><span class="cm"># api/app/tutor.py</span>
+@app.post("/api/clarify")
+def clarify(req: ClarifyRequest):
+    user_turn = (f"&lt;page section='{req.section}'&gt;\n"
+                 f"&lt;visual_state&gt;{json.dumps(req.visual_state, sort_keys=True)}&lt;/visual_state&gt;\n"
+                 f"&lt;/page&gt;\n\n{req.question}")
+    messages = [*req.history, {"role": "user", "content": user_turn}]
+
+    def sse():
+        with client.beta.messages.stream(
+            model="claude-opus-5-5",
+            max_tokens=4000,
+            system=system_blocks(req.module),   <span class="cm"># last block carries cache_control</span>
+            messages=messages,
+            output_config={"effort": "medium"},
+            betas=["server-side-fallback-2026-07-01"],
+            fallbacks="default",
+        ) as stream:
+            for text in stream.text_stream:
+                yield f"data: {json.dumps({'delta': text})}\n\n"
+
+    return StreamingResponse(sse(), media_type="text/event-stream")</pre>
+
+      <h4 class="sub-head">Gradient-descent coach (structured output)</h4>
+      <pre>class Diagnosis(BaseModel):
+    regime: Literal["converging", "oscillating", "diverging", "plateau", "saddle_stall"]
+    evidence: str                 <span class="cm"># cites only numbers from the facts</span>
+    theory_link_latex: str        <span class="cm"># e.g. "\\eta\\lambda_{\\max} = 2.1 &gt; 2"</span>
+    suggested_experiment: str
+    socratic_question: str
+
+@app.post("/api/gd-coach", response_model=Diagnosis)
+def gd_coach(facts: TrajectoryFacts) -&gt; Diagnosis:
+    response = client.messages.parse(
+        model="claude-opus-5-5",
+        max_tokens=2000,
+        system=COACH_SYSTEM,
+        messages=[{"role": "user", "content": facts.model_dump_json()}],
+        output_format=Diagnosis,
+    )
+    return response.parsed_output</pre>
+
+      <h4 class="sub-head">End-to-end flow</h4>
+      <ol class="howto-list">
+        <li><span class="howto-num">1</span><p><strong>Student</strong> sets $\eta = 0.21$ and presses Play.</p></li>
+        <li><span class="howto-num">2</span><p><strong>Pyodide</strong> computes eigenvalues $[1, 10]$ and runs gradient descent; the simulator shows the path spiraling outward.</p></li>
+        <li><span class="howto-num">3</span><p><strong>Student</strong> clicks "AI Coach"; the simulator sends computed facts ($\eta\lambda_{\max}=2.1$, step reversals) to <code>/api/gd-coach</code>.</p></li>
+        <li><span class="howto-num">4</span><p><strong>Claude</strong> returns a schema-checked diagnosis: diverging, because $\eta\lambda_{\max}=2.1&gt;2$.</p></li>
+        <li><span class="howto-num">5</span><p><strong>Simulator</strong> shows the card and asks: "Predict what happens at $\eta=0.19$."</p></li>
+      </ol>
+    </section>
+
+    <!-- ===================== 06 ===================== -->
+    <section class="numsec" id="sec-06">
+      <div class="numsec-head"><span class="numsec-num">06</span><h3>Roadmap, Evaluation &amp; Risks</h3></div>
+      <div class="roadmap">
+        <div class="phase"><span class="when">Weeks 1–3</span><h5>Phase 0 · Foundations</h5><p>Astro, Tailwind, and math scaffold; Pyodide worker; FastAPI proxy with auth and rate limits; notation contract; knowledge-pack format.</p><p class="exit">Exit: site deploys from Actions; a test tutor reply streams through the proxy.</p></div>
+        <div class="phase"><span class="when">Weeks 4–7</span><h5>Phase 1 · Vertical slice (Module 9)</h5><p>Simulator, AI coach, Muddiest Point tutor with SymPy checks, lab, concept inventory.</p><p class="exit">Exit: 10–15 student usability pilot; under 1% math errors on the eval set.</p></div>
+        <div class="phase"><span class="when">Weeks 8–16</span><h5>Phase 2 · Linear algebra core (Modules 1–5)</h5><p>Decomposition Lens; span, projection, and unit-ball visuals; notebook copilot.</p><p class="exit">Exit: concept inventories validated on a pilot cohort.</p></div>
+        <div class="phase"><span class="when">Weeks 17–23</span><h5>Phase 3 · Calculus &amp; probability (Modules 6–8)</h5><p>Backprop stepper, Bayes grids, covariance sculptor, density warp.</p></div>
+        <div class="phase"><span class="when">Weeks 24–28</span><h5>Phase 4 · Modeling capstone (Module 10)</h5><p>Dual-view model cards, DAG builder, capstone tutor.</p></div>
+        <div class="phase"><span class="when">One term</span><h5>Phase 5 · Controlled study</h5><p>A/B study for RQ1–RQ4; instructor dashboard.</p><p class="exit">Exit: pre-registered analysis and a paper draft.</p></div>
+      </div>
+
+      <h4 class="sub-head">Evaluating the AI</h4>
+      <ul class="plain">
+        <li><strong>Tutor eval set:</strong> about 50 items per module from real pilot submissions plus items seeded from the misconception taxonomy, graded on math correctness, correct diagnosis, teaching quality, and no answer leakage.</li>
+        <li><strong>Regression gate:</strong> the eval runs in CI on every prompt or knowledge-pack change and blocks merges that lower correctness.</li>
+        <li><strong>Narration faithfulness:</strong> every number in a narration must appear in the fact sheet. Target 100%.</li>
+        <li><strong>Human review:</strong> the teaching team audits a weekly sample of consented transcripts.</li>
+      </ul>
+
+      <h4 class="sub-head">Risks</h4>
+      <div class="table-scroll">
+        <table class="cmp-table">
+          <thead><tr><th>Risk</th><th>Mitigation</th></tr></thead>
+          <tbody>
+            <tr><td><strong>The LLM states incorrect math</strong></td><td>SymPy checks, browser-computed fact sheets, verified badges, an error-report button, and the eval gate</td></tr>
+            <tr><td><strong>Students fish for answers</strong></td><td>Attempt-gated hint ladder; Socratic default; solutions kept out of hint prompts</td></tr>
+            <tr><td><strong>API key exposure on a static site</strong></td><td>All LLM calls go through the backend, with CORS and per-user rate limits</td></tr>
+            <tr><td><strong>Code execution through SymPy parsing</strong></td><td>Sandboxed subprocess with timeouts, or run in the browser</td></tr>
+            <tr><td><strong>Pyodide download size (~10 MB)</strong></td><td>Load on first interaction, cache it, and show a static fallback first</td></tr>
+            <tr><td><strong>Novelty effect and self-selection</strong></td><td>Within-cohort randomization, delayed post-tests, pre-registration</td></tr>
+            <tr><td><strong>Privacy</strong></td><td>PII removed before LLM calls, consent-gated logging, a retention policy, IRB review</td></tr>
+            <tr><td><strong>Accessibility</strong></td><td>MathML output, keyboard-operable visuals, text descriptions of each visual's state</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  MathMatrix AI &nbsp;|&nbsp; Research &amp; Development Plan v0.1 &nbsp;|&nbsp; Clark Ngo &nbsp;|&nbsp; 2026-10-05<br>
+  Drafted with Claude (Anthropic) via Claude Code; the author directed the scope and is responsible for the content. The gradient-descent and SymPy examples were run and their outputs verified.
+</footer>
+<script>
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.getElementById('themeBtn').textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+    try { localStorage.setItem('mmx-theme', theme); } catch (e) {}
+  }
+  function toggleTheme() {
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  }
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mmx-theme'); } catch (e) {}
+    var preset = document.documentElement.getAttribute('data-theme');
+    var prefersDark = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(saved || preset || (prefersDark ? 'dark' : 'light'));
+  })();
+
+  (function () {
+    var links = document.querySelectorAll('.toc-sidebar a');
+    if (!('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + en.target.id); });
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    document.querySelectorAll('section.numsec').forEach(function (s) { io.observe(s); });
+  })();
+</script>
+</body>
+</html>

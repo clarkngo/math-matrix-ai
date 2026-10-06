@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MathMatrix AI | Course Navigation</title>
+<meta name="description" content="A 10-module, AI-assisted interactive curriculum on the mathematics behind data science: linear algebra, matrix decompositions, vector calculus, probability, optimization, and probabilistic modeling.">
+<style>
+  :root {
+    --bg: #f4f5fa;
+    --surface: #ffffff;
+    --surface2: #eceef8;
+    --border: #d3d7ea;
+    --text: #12142b;
+    --text-muted: #565b7c;
+    --accent: #4338ca;
+    --accent2: #3730a3;
+    --accent-light: #e8e7fb;
+    --on-accent: #ffffff;
+    --card-hover: #eeedfb;
+    --shadow: 0 2px 8px rgba(20,18,58,0.10);
+    --shadow-hover: 0 8px 24px rgba(20,18,58,0.16);
+    --header-bg: #14123a;
+    --header-text: #ffffff;
+    --hero-grad: linear-gradient(135deg, #14123a 0%, #2a2575 55%, #4338ca33 100%);
+    --tag-linalg: #1565c0;
+    --tag-calc: #b45309;
+    --tag-prob: #6a1b9a;
+    --tag-opt: #2e7d32;
+    --tag-model: #00796b;
+    --tag-lab: #0277bd;
+    --tag-linalg-bg: #e3f0fd;
+    --tag-calc-bg: #fff3e0;
+    --tag-prob-bg: #f3e5f5;
+    --tag-opt-bg: #e8f5e9;
+    --tag-model-bg: #e0f2f1;
+    --tag-lab-bg: #e1f0fa;
+  }
+  [data-theme="dark"] {
+    --bg: #0b0b1a;
+    --surface: #14142b;
+    --surface2: #1c1c3a;
+    --border: #2c2c52;
+    --text: #e8e8f6;
+    --text-muted: #9a9cc0;
+    --accent: #a5b4fc;
+    --accent2: #c7d2fe;
+    --accent-light: #1e1d45;
+    --on-accent: #12124a;
+    --card-hover: #1c1c3a;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #08081a;
+    --header-text: #e8e8f6;
+    --hero-grad: linear-gradient(135deg, #08081a 0%, #1c1a52 55%, #a5b4fc22 100%);
+    --tag-linalg: #90caf9;
+    --tag-calc: #ffcc80;
+    --tag-prob: #ce93d8;
+    --tag-opt: #a5d6a7;
+    --tag-model: #80cbc4;
+    --tag-lab: #4fc3f7;
+    --tag-linalg-bg: #0d1f35;
+    --tag-calc-bg: #2a1a00;
+    --tag-prob-bg: #1f0d2a;
+    --tag-opt-bg: #0d2010;
+    --tag-model-bg: #0d2520;
+    --tag-lab-bg: #0a1f30;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+  header {
+    background: var(--header-bg);
+    color: var(--header-text);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .header-brand { display: flex; align-items: center; gap: 14px; }
+  .brand-icon {
+    width: 44px; height: 44px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; font-weight: 900;
+    color: var(--on-accent);
+    flex-shrink: 0;
+    letter-spacing: -0.5px;
+  }
+  .brand-text h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: 0.01em; line-height: 1.2; }
+  .brand-text p { font-size: 0.78rem; opacity: 0.65; margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .course-badge {
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 0.72rem; font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .author-pill, .theme-toggle {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: var(--header-text);
+    text-decoration: none;
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem; font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .author-pill:hover, .theme-toggle:hover { background: rgba(255,255,255,0.22); }
+
+  .hero {
+    background: var(--hero-grad);
+    color: #fff;
+    padding: 40px 24px 36px;
+    text-align: center;
+  }
+  .hero h2 { font-size: 1.7rem; font-weight: 800; margin-bottom: 8px; }
+  .hero p { opacity: 0.85; font-size: 0.96rem; max-width: 700px; margin: 0 auto 18px; line-height: 1.55; }
+  .strand-pills { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .strand-pill {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 0.75rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .strand-pill span { font-weight: 800; margin-left: 4px; }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 32px 24px 48px; }
+  .section-label {
+    font-size: 0.75rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--text-muted);
+    margin-bottom: 16px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .acc-section { margin-bottom: 32px; }
+  .acc-trigger {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    width: 100%; background: none; border: none; text-align: left; cursor: pointer;
+    font-family: inherit; padding: 0 0 8px; margin: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .acc-trigger-text { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .acc-trigger .section-label { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .acc-chevron { flex: none; font-size: 1rem; color: var(--accent); transition: transform .2s ease; }
+  .acc-trigger[aria-expanded="true"] .acc-chevron { transform: rotate(180deg); }
+  .acc-trigger:hover { opacity: .8; }
+  .acc-panel { overflow: hidden; transition: max-height .3s ease; }
+  .acc-panel-inner { padding-top: 20px; }
+
+  .safeguards {
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    border-radius: 14px;
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+  }
+  .safeguards > p { font-size: 0.84rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px; max-width: 78ch; }
+  .safeguard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .safeguard-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .safeguard-item h4 { font-size: 0.84rem; font-weight: 700; margin-bottom: 4px; }
+  .safeguard-item p { font-size: 0.78rem; color: var(--text-muted); line-height: 1.45; }
+  .safeguards-foot {
+    margin-top: 16px; padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 0.78rem; color: var(--text-muted);
+    display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center;
+  }
+  .safeguards-foot a { color: var(--accent); font-weight: 700; text-decoration: none; }
+  .safeguards-foot a:hover { text-decoration: underline; }
+
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 40px; }
+  .special-grid, .lab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; margin-bottom: 32px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--text);
+    display: flex; flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    box-shadow: var(--shadow);
+  }
+  a.card { cursor: pointer; }
+  a.card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); background: var(--card-hover); }
+  .card-accent-bar { height: 5px; background: var(--accent); }
+  .card.strand-linalg .card-accent-bar { background: var(--tag-linalg); }
+  .card.strand-calc   .card-accent-bar { background: var(--tag-calc); }
+  .card.strand-prob   .card-accent-bar { background: var(--tag-prob); }
+  .card.strand-opt    .card-accent-bar { background: var(--tag-opt); }
+  .card.strand-model  .card-accent-bar { background: var(--tag-model); }
+  .card.strand-lab    .card-accent-bar { background: var(--tag-lab); }
+  .card.strand-special .card-accent-bar { background: linear-gradient(90deg, var(--accent), var(--tag-linalg)); }
+
+  .card-body { padding: 18px 20px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .card-header-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .lesson-num { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; flex-shrink: 0; margin-top: 2px; }
+  .strand-tag { font-size: 0.68rem; font-weight: 700; padding: 3px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.05em; flex-shrink: 0; text-align: right; }
+  .tag-linalg  { color: var(--tag-linalg); background: var(--tag-linalg-bg); }
+  .tag-calc    { color: var(--tag-calc);   background: var(--tag-calc-bg); }
+  .tag-prob    { color: var(--tag-prob);   background: var(--tag-prob-bg); }
+  .tag-opt     { color: var(--tag-opt);    background: var(--tag-opt-bg); }
+  .tag-model   { color: var(--tag-model);  background: var(--tag-model-bg); }
+  .tag-lab     { color: var(--tag-lab);    background: var(--tag-lab-bg); }
+  .tag-special { color: var(--accent);     background: var(--accent-light); }
+
+  .card-title { font-size: 1.02rem; font-weight: 700; line-height: 1.3; color: var(--text); }
+  .card-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; flex: 1; }
+  .status-flag {
+    display: inline-flex; align-items: center; gap: 5px; align-self: flex-start;
+    font-size: 0.68rem; font-weight: 700;
+    color: var(--text-muted); background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 3px 8px; letter-spacing: 0.02em;
+  }
+  .status-flag.live { color: var(--tag-opt); background: var(--tag-opt-bg); border-color: var(--tag-opt); }
+  .card-footer {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .card-terms { font-size: 0.72rem; color: var(--text-muted); }
+  .card-terms strong { color: var(--text); font-weight: 600; }
+  .card-arrow { font-size: 1rem; color: var(--text-muted); transition: transform 0.2s; }
+  a.card:hover .card-arrow { transform: translateX(4px); }
+  .card.special-card { border: 2px solid var(--accent); }
+  .card.special-card .card-title { color: var(--accent); }
+  .card.lab-card { border: 2px solid var(--tag-lab); }
+  .card.lab-card .card-title { color: var(--tag-lab); }
+
+  .progress-strip { display: flex; gap: 4px; margin-bottom: 28px; align-items: center; }
+  .progress-block { height: 6px; border-radius: 3px; flex: 1; }
+
+  footer {
+    text-align: center; padding: 20px;
+    font-size: 0.78rem; color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    margin-top: 8px; line-height: 1.6;
+  }
+  footer a { color: var(--accent); font-weight: 600; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 520px) {
+    .header-inner { padding: 14px 16px; }
+    .brand-text h1 { font-size: 1rem; }
+    .hero { padding: 32px 16px 28px; }
+    .hero h2 { font-size: 1.3rem; }
+    main { padding: 24px 16px 40px; }
+    .card-grid, .special-grid, .lab-grid { grid-template-columns: minmax(0, 1fr); }
+    .card-footer { flex-direction: column; align-items: flex-start; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+    a.card:hover, a.card:hover .card-arrow { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="brand-icon">MM</div>
+      <div class="brand-text">
+        <h1>MathMatrix AI</h1>
+        <p>The Mathematics of Data Science, with AI Tutoring — 10 Modules</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="course-badge">Active WIP</span>
+      <a class="author-pill" href="https://clarkngo.github.io/research/" target="_blank" rel="noopener">👤 Clark Ngo</a>
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+    </div>
+  </div>
+</header>
+
+<div class="hero">
+  <h2>Course Navigation</h2>
+  <p>An interactive curriculum for the math behind machine learning: linear algebra, analytic geometry, matrix decompositions, vector calculus, probability, continuous optimization, and probabilistic modeling. Each module builds from basic algebra with step-by-step worked examples, real-life uses you can picture, and a quick quiz.</p>
+  <div class="strand-pills">
+    <div class="strand-pill">Linear Algebra <span>5</span></div>
+    <div class="strand-pill">Vector Calculus <span>1</span></div>
+    <div class="strand-pill">Probability <span>2</span></div>
+    <div class="strand-pill">Optimization <span>1</span></div>
+    <div class="strand-pill">Probabilistic Modeling <span>1</span></div>
+  </div>
+</div>
+
+<main>
+
+  <section class="acc-section" id="ai-use-acc">
+    <h3>
+      <button class="acc-trigger" aria-expanded="true" aria-controls="ai-use-panel" id="ai-use-trigger">
+        <span class="acc-trigger-text"><span class="section-label">🤖 How This Course Uses AI</span><span class="course-badge">Read first</span></span>
+        <span class="acc-chevron" aria-hidden="true">▾</span>
+      </button>
+    </h3>
+    <div class="acc-panel" id="ai-use-panel" role="region" aria-labelledby="ai-use-trigger">
+    <div class="acc-panel-inner">
+    <div class="safeguards">
+      <p>An AI tutor that explains math confidently and wrongly does more harm than no tutor at all. These rules apply to every AI feature in the course: the tutor, the simulator coach, the decomposition narrator, and the notebook hints.</p>
+      <div class="safeguard-grid">
+        <div class="safeguard-item">
+          <h4>Math is verified, not trusted</h4>
+          <p>Symbolic claims are checked with a computer algebra system (SymPy). Numbers are computed in your browser, and the AI only interprets them. Verified equations carry a ✓ badge.</p>
+        </div>
+        <div class="safeguard-item">
+          <h4>Hints before answers</h4>
+          <p>The tutor asks you to predict or explain a step before it explains it. Full solutions unlock only after real attempts.</p>
+        </div>
+        <div class="safeguard-item">
+          <h4>Grounded in the page</h4>
+          <p>The AI sees the module's definitions, its known misconceptions, and the current state of the visual you're using. It doesn't answer from a bare question.</p>
+        </div>
+        <div class="safeguard-item">
+          <h4>One notation everywhere</h4>
+          <p>Column vectors, numerator-layout Jacobians, and θ for parameters, in every lesson and every AI reply.</p>
+        </div>
+        <div class="safeguard-item">
+          <h4>The AI can still be wrong</h4>
+          <p>Every reply has a "report an error" button. Reported errors feed the evaluation set that every prompt change is tested against.</p>
+        </div>
+        <div class="safeguard-item">
+          <h4>Your data stays yours</h4>
+          <p>Personal details are removed before anything reaches the model. Research logging is opt-in and covered by IRB review.</p>
+        </div>
+      </div>
+      <div class="safeguards-foot">
+        <span>The full design is in the research plan.</span>
+        <a href="research-plan.html#sec-03">Read the AI feature specs →</a>
+      </div>
+    </div>
+    </div>
+    </div>
+  </section>
+
+  <div class="section-label">📚 Course Modules — Start with Module 0, then 1–10</div>
+
+  <div class="progress-strip" aria-hidden="true">
+    <div class="progress-block" style="background:var(--tag-linalg);"></div>
+    <div class="progress-block" style="background:var(--tag-linalg);"></div>
+    <div class="progress-block" style="background:var(--tag-linalg);"></div>
+    <div class="progress-block" style="background:var(--tag-linalg);"></div>
+    <div class="progress-block" style="background:var(--tag-linalg);"></div>
+    <div class="progress-block" style="background:var(--tag-calc);"></div>
+    <div class="progress-block" style="background:var(--tag-prob);"></div>
+    <div class="progress-block" style="background:var(--tag-prob);"></div>
+    <div class="progress-block" style="background:var(--tag-opt);"></div>
+    <div class="progress-block" style="background:var(--tag-model);"></div>
+  </div>
+
+  <div class="card-grid">
+
+    <a class="card special-card strand-special" href="module00.html">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row"><span class="lesson-num">Module 0</span><span class="strand-tag tag-special">Start Here</span></div>
+        <div class="card-title">The Math Toolkit: Reading the Symbols</div>
+        <div class="card-desc">Only remember basic algebra? Start here. Every symbol in the course (Σ, θ, ‖x‖, ∇, ⊤…) translated back into algebra you know, with worked examples and real-life uses.</div>
+        <span class="status-flag live">● Step-by-step lesson</span>
+      </div>
+      <div class="card-footer"><span class="card-terms"><strong>Key terms:</strong> Vector, Sum, Function, Derivative, arg min</span><span class="card-arrow">→</span></div>
+    </a>
+
+    <a href="module01.html" class="card strand-linalg">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row"><span class="lesson-num">Module 1</span><span class="strand-tag tag-linalg">Linear Algebra</span></div>
+        <div class="card-title">Systems of Linear Equations &amp; Matrix Operations</div>
+        <div class="card-desc">Solving Ax = b by Gaussian elimination, reading a solution set as particular plus homogeneous parts, and matrix products as composed transformations. Row operations animate on intersecting planes while the solution stays put.</div>
+        <span class="status-flag live">● Step-by-step lesson</span>
+      </div>
+      <div class="card-footer"><span class="card-terms"><strong>Key terms:</strong> Row Echelon Form, Pivot, Inverse, Normal Equations</span><span class="card-arrow">→</span></div>
+    </a>
+
+    <a href="module02.html" class="card strand-linalg">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row"><span class="lesson-num">Module 2</span><span class="strand-tag tag-linalg">Linear Algebra</span></div>
+        <div class="card-title">Vector Spaces, Basis, Rank &amp; Linear Mappings</div>
+        <div class="card-desc">Span, independence, basis and dimension, kernel and image, rank–nullity, and change of basis. Ends with why duplicated features make a regression design matrix singular.</div>
+        <span class="status-flag live">● Step-by-step lesson</span>
+      </div>
+      <div class="card-footer"><span class="card-terms"><strong>Key terms:</strong> Span, Basis, Rank, Kernel, Multicollinearity</span><span class="card-arrow">→</span></div>
+    </a>
+
+    <a href="module03.html" class="card strand-linalg">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row"><span class="lesson-num">Module 3</span><span class="strand-tag tag-linalg">Analytic Geometry</span></div>
+        <div class="card-title">Norms, Inner Products &amp; Orthogonality</div>
+        <div class="card-desc">ℓ1, ℓ2 and ℓ∞ unit balls, general inner products, Cauchy–Schwarz, angles and orthogonality. Explains from a picture why the ℓ1 ball's corners make Lasso solutions sparse.</div>
+        <span class="status-flag live">● Step-by-step lesson</span>
+      </div>
+      <div class="card-footer"><span class="card-terms"><strong>Key terms:</strong> Norm, Inner Product, Cosine Similarity, Lasso</span><span class="card-arrow">→</span></div>
+    </a>
+
+    <a href="module04.html" class="card strand-linalg">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row"><span class="lesson-num">Module 4</span><span class="strand-tag tag-linalg">Analytic Geometry</span></div>
+        <div class="card-title">Orthonormal Basis &amp; Orthogonal Projections</div>
+        <div class="card-desc">Gram–Schmidt, projection matrices, and QR. The key result: least-squares regression is an orthogonal projection of y onto the column space of X.</div>
+        <span class="status-flag live">● Step-by-step lesson</span>
+      </div>
+      <div class="card-footer"><span class="card-terms"><strong>Key terms:</strong> Gram–Schmidt, Projection, Hat Matrix, QR</span><span class="card-arrow">→</span></div>
+    </a>
+
+    <a href="module05.html" class="card strand-linalg">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row"><span class="lesson-num">Module 5</span><span class="strand-tag tag-linalg">Decompositions</span></div>
+        <div class="card-title">Determinants, Eigenvalues &amp; Eigenvectors</div>
+        <div class="card-desc">Determinants as volume scaling, eigendecomposition, the spectral theorem, Cholesky, and the SVD as rotate → scale → rotate. Code labs build power iteration, SVD image compression, and PCA.</div>
+        <span class="status-flag live">● Step-by-step lesson</span>
+      </div>
+      <div class="card-footer"><span class="card-terms"><strong>Key terms:</strong> Eigenvector, Spectral Theorem, SVD, PCA</span><span class="card-arrow">→</span></div>
+    </a>
+
+    <a href="module06.html" class="card strand-calc">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row"><span class="lesson-num">Module 6</span><span class="strand-tag tag-calc">Vector Calculus</span></div>
+        <div class="card-title">Partial Differentiation &amp; Vector Gradients</div>
+        <div class="card-desc">Gradients, Jacobians, the multivariate chain rule, and matrix-calculus identities, with every expression annotated by its shape. Builds a small reverse-mode autodiff and steps through backpropagation.</div>
+        <span class="status-flag live">● Step-by-step lesson</span>
+      </div>
+      <div class="card-footer"><span class="card-terms"><strong>Key terms:</strong> Gradient, Jacobian, Chain Rule, Backprop</span><span class="card-arrow">→</span></div>
+    </a>
+
+    <a href="module07.html" class="card strand-prob">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row"><span class="lesson-num">Module 7</span><span class="strand-tag tag-prob">Probability</span></div>
+        <div class="card-title">Probability Spaces, Rules &amp; Bayes' Theorem</div>
+        <div class="card-desc">Sum and product rules, independence, expectation and covariance, and Bayes' theorem taught with a 1000-person frequency grid so base rates are hard to ignore.</div>
+        <span class="status-flag live">● Step-by-step lesson</span>
+      </div>
+      <div class="card-footer"><span class="card-terms"><strong>Key terms:</strong> Conditional Probability, Bayes, Base Rate, Naive Bayes</span><span class="card-arrow">→</span></div>
+    </a>
+
+    <a href="module08.html" class="card strand-prob">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row"><span class="lesson-num">Module 8</span><span class="strand-tag tag-prob">Probability</span></div>
+        <div class="card-title">Gaussian Distributions &amp; Change of Variables</div>
+        <div class="card-desc">Multivariate Gaussians as transformed spheres, conditioning and marginalizing, affine transforms, and the Jacobian term in change of variables. Leads into Gaussian processes, VAEs, and normalizing flows.</div>
+        <span class="status-flag live">● Step-by-step lesson</span>
+      </div>
+      <div class="card-footer"><span class="card-terms"><strong>Key terms:</strong> Covariance, Conditioning, Jacobian, Reparameterization</span><span class="card-arrow">→</span></div>
+    </a>
+
+    <a class="card strand-opt" href="module09.html">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row"><span class="lesson-num">Module 9</span><span class="strand-tag tag-opt">Optimization</span></div>
+        <div class="card-title">Continuous Optimization &amp; Gradient Descent</div>
+        <div class="card-desc">Why the learning rate has a hard ceiling of 2/λ<sub>max</sub>, how the condition number sets the speed, momentum, SGD, Lagrange multipliers, and convexity. </div>
+        <span class="status-flag live">● Step-by-step lesson + live simulator</span>
+      </div>
+      <div class="card-footer"><span class="card-terms"><strong>Key terms:</strong> Learning Rate, Condition Number, Momentum, Convexity</span><span class="card-arrow">→</span></div>
+    </a>
+
+    <a href="module10.html" class="card strand-model">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row"><span class="lesson-num">Module 10</span><span class="strand-tag tag-model">Capstone</span></div>
+        <div class="card-title">Probabilistic Modeling, Parameter Estimation &amp; Graphical Models</div>
+        <div class="card-desc">MLE and MAP side by side: least squares is Gaussian-noise MLE, and ridge is Gaussian-prior MAP. Bayesian linear regression, directed graphical models, d-separation, and EM.</div>
+        <span class="status-flag live">● Step-by-step lesson</span>
+      </div>
+      <div class="card-footer"><span class="card-terms"><strong>Key terms:</strong> MLE, MAP, Bayesian Regression, DAG, EM</span><span class="card-arrow">→</span></div>
+    </a>
+
+  </div>
+
+  <div class="section-label">🎓 Research &amp; Development</div>
+  <div class="special-grid">
+    <a class="card special-card strand-special" href="research-plan.html">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row"><span class="lesson-num">Plan · v0.1</span><span class="strand-tag tag-special">Research</span></div>
+        <div class="card-title">📖 Research &amp; Development Plan</div>
+        <div class="card-desc">Where students get stuck moving from math to ML, the full 10-module scope, four AI feature specs with prompt strategies, the tech stack and architecture, a working prototype, and the study design.</div>
+      </div>
+      <div class="card-footer"><span class="card-terms"><strong>Covers:</strong> Framework · Curriculum · AI Features · Stack · Roadmap</span><span class="card-arrow">→</span></div>
+    </a>
+    <a class="card special-card strand-special" href="research-plan.html#sec-03">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row"><span class="lesson-num">Specs</span><span class="strand-tag tag-special">AI Features</span></div>
+        <div class="card-title">🤖 AI Feature Specifications</div>
+        <div class="card-desc">The Muddiest Point tutor, the gradient-descent coach, the Matrix Decomposition Lens, and the notebook hint ladder: what each does, its interface, and how its prompts are built.</div>
+      </div>
+      <div class="card-footer"><span class="card-terms"><strong>Covers:</strong> Tutor · Coach · Lens · Hint Ladder</span><span class="card-arrow">→</span></div>
+    </a>
+  </div>
+
+  <div class="section-label">🔬 Simulators</div>
+  <div class="lab-grid">
+    <a class="card lab-card strand-lab" href="sim-gradient-descent.html">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row"><span class="lesson-num">Sim</span><span class="strand-tag tag-lab">Module 9</span></div>
+        <div class="card-title">⚙️ Gradient Descent Flight Simulator</div>
+        <div class="card-desc">Fly gradient descent over an ill-conditioned quadratic. Push the learning rate past 2/λ<sub>max</sub> and watch it diverge, add momentum, and move the start point.</div>
+        <span class="status-flag live">● Live prototype</span>
+      </div>
+      <div class="card-footer"><span class="card-terms"><strong>Covers:</strong> Learning Rate · Curvature · Momentum · Convergence</span><span class="card-arrow">→</span></div>
+    </a>
+  </div>
+
+</main>
+
+<footer>
+  MathMatrix AI &nbsp;|&nbsp; 10 Modules &nbsp;|&nbsp; Curriculum by <a href="https://clarkngo.github.io/research/" target="_blank" rel="noopener">Clark Ngo</a> &nbsp;|&nbsp; <a href="https://github.com/clarkngo/math-matrix-ai" target="_blank" rel="noopener">Source</a><br>
+  Each module is a step-by-step lesson with worked examples, real-life uses, and a quiz. The AI tutor features are described in the research plan and not yet built.
+</footer>
+
+<script>
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.getElementById('themeBtn').textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+    try { localStorage.setItem('mmx-theme', theme); } catch (e) {}
+  }
+  function toggleTheme() {
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  }
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mmx-theme'); } catch (e) {}
+    var preset = document.documentElement.getAttribute('data-theme');
+    var prefersDark = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(saved || preset || (prefersDark ? 'dark' : 'light'));
+  })();
+
+  (function () {
+    document.querySelectorAll('.acc-trigger').forEach(function (trigger) {
+      var panel = document.getElementById(trigger.getAttribute('aria-controls'));
+      panel.style.maxHeight = trigger.getAttribute('aria-expanded') === 'true' ? 'none' : '0px';
+      trigger.addEventListener('click', function () {
+        var next = trigger.getAttribute('aria-expanded') !== 'true';
+        trigger.setAttribute('aria-expanded', next ? 'true' : 'false');
+        panel.style.maxHeight = panel.scrollHeight + 'px';
+        if (!next) requestAnimationFrame(function () { panel.style.maxHeight = '0px'; });
+      });
+      panel.addEventListener('transitionend', function () {
+        if (trigger.getAttribute('aria-expanded') === 'true') panel.style.maxHeight = 'none';
+      });
+    });
+  })();
+</script>
+</body>
+</html>

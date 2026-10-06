@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3: Norms, Inner Products &amp; Orthogonality | MathMatrix AI</title>
+<meta name="description" content="Length, distance, the dot product, angles, orthogonality, and cosine similarity, with step-by-step examples and real-life uses.">
+<script>window.MathJax = { tex: { inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]] }, svg: { fontCache: "global" } };</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg-full.min.js"></script>
+<link rel="stylesheet" href="assets/lesson.css">
+<script src="assets/lesson.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div class="topbar"><div class="topbar-inner">
+  <a href="index.html" class="back-link">← Course Home</a>
+  <span class="topbar-inst">MathMatrix AI · Clark Ngo</span>
+</div></div>
+
+<header class="lesson-header"><div class="header-inner">
+  <span class="eyebrow">Module 3 · Analytic Geometry</span>
+  <h1>Norms, Inner Products &amp; Orthogonality</h1>
+  <p class="tagline">How long is a vector, how far apart are two of them, and how similar are they? One operation, the dot product, answers all three.</p>
+  <div class="meta-row">
+    <span>📊 Beginner–Intermediate</span><span>⏱ ~1.5 hours</span><span>🧮 Needs: Module 2</span>
+    <div class="header-actions"><button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button></div>
+  </div>
+</div></header>
+
+<nav class="section-nav" aria-label="Lesson sections"><div class="section-nav-inner">
+  <a href="#overview">Overview</a>
+  <a href="#s1">Length</a>
+  <a href="#s2">Other Norms</a>
+  <a href="#s3">Dot Product</a>
+  <a href="#s4">Angles &amp; Similarity</a>
+  <a href="#s5">Orthogonality</a>
+  <a href="#review">Review</a>
+</div></nav>
+
+<div class="layout"><main id="main">
+
+<section id="overview" class="module overview-box">
+  <h2>Lesson overview</h2>
+  <p>Machine learning constantly asks "how close is this to that?" Which song is closest to the ones you like? Which past patient is most similar to this one? How far is the prediction from the truth? This module gives you the tools for measuring that: length (a <dfn>norm</dfn>), distance, and angle.</p>
+  <h3>By the end of this module you will be able to</h3>
+  <ul class="lo-display">
+    <li>Compute the length of a vector and the distance between two points.</li>
+    <li>Compare three ways of measuring length (ℓ1, ℓ2, ℓ∞) and say when each fits.</li>
+    <li>Compute a dot product and use it to find the angle between vectors.</li>
+    <li>Use cosine similarity to compare documents.</li>
+    <li>Recognize orthogonal (perpendicular) vectors.</li>
+  </ul>
+  <div class="need-grid">
+    <div class="need-card"><b>You need</b>The Pythagorean theorem $a^2 + b^2 = c^2$; vectors (Module 0).</div>
+    <div class="need-card"><b>This unlocks</b>Projections (Module 4), regularization (Lasso and ridge), and search and recommendation.</div>
+  </div>
+</section>
+
+<section id="s1" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">📐</span><h2>Length: the Pythagorean theorem in disguise</h2><span class="module-time">≈ 15 min</span></div>
+  <p>The vector $(3, 4)$ goes 3 across and 4 up. Those two moves form the legs of a right triangle, and the arrow is the hypotenuse. So its length, written $\lVert\mathbf{x}\rVert$ and called the <dfn>norm</dfn>, comes straight from Pythagoras:</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · length of $(3, 4)$ and distance between two points</span>
+    <ol class="steps">
+      <li><div class="step-math">$\lVert(3, 4)\rVert = \sqrt{3^2 + 4^2} = \sqrt{9 + 16} = \sqrt{25} = 5$</div><div class="step-why">Square each entry, add, take the square root.</div></li>
+      <li><div class="step-math">Distance from $(1, 1)$ to $(4, 5)$: subtract first, $(4-1,\; 5-1) = (3, 4)$</div><div class="step-why">The distance between two points is the length of the arrow from one to the other.</div></li>
+      <li><div class="step-math">$\lVert(3, 4)\rVert = 5$</div><div class="step-why">Same arrow as before.</div></li>
+    </ol>
+    <div class="result">$\lVert\mathbf{x}\rVert_2 = \sqrt{x_1^2 + x_2^2 + \dots + x_n^2}$ works in any number of dimensions.</div>
+  </div>
+  <div class="bridge-box">
+    <span class="box-label">You already know this</span>
+    <p>This is the distance formula from algebra, $d = \sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}$, written for vectors.</p>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>"As the crow flies" distance is this norm. Your phone's "find nearby restaurants" sorts places by it. In ML, the error of a prediction is often the distance between the predicted vector and the true one.</p>
+    <span class="hook">Length = Pythagoras. Distance = length of the difference.</span>
+  </div>
+</section>
+
+<section id="s2" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🚕</span><h2>Other ways to measure length</h2><span class="module-time">≈ 15 min</span></div>
+  <p>Straight-line distance isn't the only reasonable measure. For $\mathbf{x} = (3, 4)$:</p>
+  <div class="table-scroll"><table class="symbol-table">
+    <thead><tr><th>Norm</th><th>Formula</th><th>For $(3, 4)$</th><th>Think of it as</th></tr></thead>
+    <tbody>
+      <tr><td>$\lVert\mathbf{x}\rVert_2$</td><td>$\sqrt{x_1^2 + x_2^2}$</td><td>$5$</td><td>Straight line (a bird)</td></tr>
+      <tr><td>$\lVert\mathbf{x}\rVert_1$</td><td>$|x_1| + |x_2|$</td><td>$3 + 4 = 7$</td><td>City blocks (a taxi)</td></tr>
+      <tr><td>$\lVert\mathbf{x}\rVert_\infty$</td><td>$\max(|x_1|, |x_2|)$</td><td>$\max(3, 4) = 4$</td><td>The biggest single move (a chess king)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>In Manhattan, a taxi going 3 blocks east and 4 blocks north drives 7 blocks (ℓ1), even though the straight-line distance is 5 (ℓ2). A chess king needs 4 moves to cover the same offset, because it can move diagonally (ℓ∞). Warehouses use ℓ1 to plan picker routes along aisles.</p>
+    <p><strong>In ML:</strong> adding an ℓ1 penalty to a model (called <dfn>Lasso</dfn>) pushes many parameters to exactly zero, which picks out a few important features. It's like a strict luggage limit that makes you leave whole items at home instead of packing a little of everything.</p>
+    <span class="hook">ℓ2 is the bird, ℓ1 is the taxi, ℓ∞ is the chess king.</span>
+  </div>
+</section>
+
+<section id="s3" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">⚫</span><h2>The dot product: multiply and add</h2><span class="module-time">≈ 15 min</span></div>
+  <p>The <dfn>dot product</dfn> (also called the <dfn>inner product</dfn>) of two vectors multiplies matching entries and adds the results. It produces a single number.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · $(1, 2) \cdot (3, 4)$</span>
+    <ol class="steps">
+      <li><div class="step-math">$1 \times 3 = 3, \quad 2 \times 4 = 8$</div><div class="step-why">Multiply first with first, second with second.</div></li>
+      <li><div class="step-math">$3 + 8 = 11$</div><div class="step-why">Add them up.</div></li>
+    </ol>
+    <div class="result">$(1, 2) \cdot (3, 4) = 11$. Also written $\mathbf{x}^\top\mathbf{y}$.</div>
+  </div>
+  <p>Two facts make it useful:</p>
+  <ul>
+    <li>A vector dotted with itself gives its length squared: $(3, 4)\cdot(3, 4) = 9 + 16 = 25 = 5^2$.</li>
+    <li>Each row of a matrix-times-vector product (Module 1) is a dot product.</li>
+  </ul>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>A shopping bill is a dot product: quantities $(2, 1, 4)$ dotted with prices $(3, 5, 1)$ is $6 + 5 + 4 = 15$ dollars. A course grade is a dot product of scores and weights: scores $(90, 80)$ with weights $(0.6, 0.4)$ gives $54 + 32 = 86$. Every neuron in a neural network computes a dot product of its inputs and weights.</p>
+    <span class="hook">Dot product = "weighted total": multiply pairs, add them up.</span>
+  </div>
+</section>
+
+<section id="s4" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">📐</span><h2>Angles and cosine similarity</h2><span class="module-time">≈ 25 min</span></div>
+  <p>The dot product also measures how much two vectors point the same way. The formula is</p>
+  $$\cos\theta = \frac{\mathbf{x}\cdot\mathbf{y}}{\lVert\mathbf{x}\rVert\,\lVert\mathbf{y}\rVert}.$$
+  <p>$\cos\theta = 1$ means same direction, $0$ means perpendicular, $-1$ means opposite.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · angle between $(1, 2)$ and $(3, 4)$</span>
+    <ol class="steps">
+      <li><div class="step-math">$\mathbf{x}\cdot\mathbf{y} = 11$</div><div class="step-why">From the previous section.</div></li>
+      <li><div class="step-math">$\lVert(1, 2)\rVert = \sqrt{5} \approx 2.236, \quad \lVert(3, 4)\rVert = 5$</div><div class="step-why">Lengths by Pythagoras.</div></li>
+      <li><div class="step-math">$\cos\theta = \dfrac{11}{2.236 \times 5} = \dfrac{11}{11.18} \approx 0.984$</div><div class="step-why">Very close to 1: nearly the same direction.</div></li>
+      <li><div class="step-math">$\theta \approx 10.3°$</div><div class="step-why">Use $\cos^{-1}$ on a calculator.</div></li>
+    </ol>
+  </div>
+  <p>The formula can never give more than 1, because $|\mathbf{x}\cdot\mathbf{y}| \le \lVert\mathbf{x}\rVert\lVert\mathbf{y}\rVert$ always (the <dfn>Cauchy–Schwarz inequality</dfn>). Here $11 \le 11.18$ ✓.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · which documents are similar?</span>
+    <p>Count how often three words appear: ("math", "data", "cat").</p>
+    <ol class="steps">
+      <li><div class="step-math">Doc A $= (2, 1, 0)$, Doc B $= (4, 2, 0)$, Doc C $= (0, 1, 3)$</div><div class="step-why">Each document becomes a vector of word counts.</div></li>
+      <li><div class="step-math">$\cos(A, B) = \dfrac{8 + 2 + 0}{\sqrt{5}\cdot\sqrt{20}} = \dfrac{10}{10} = 1$</div><div class="step-why">B is A written twice as long. Same topic, different length; cosine ignores length.</div></li>
+      <li><div class="step-math">$\cos(A, C) = \dfrac{0 + 1 + 0}{\sqrt{5}\cdot\sqrt{10}} = \dfrac{1}{\sqrt{50}} \approx 0.14$</div><div class="step-why">Only the word "data" overlaps. Nearly unrelated (about 82°).</div></li>
+    </ol>
+    <div class="result">A and B are about the same thing; C is about something else (cats).</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>This is how search engines rank pages, how music apps find "more like this", and how AI chatbots look up relevant documents: everything becomes a vector, and the closest by cosine wins. A dating or roommate app that matches people by answers to the same questions can do it the same way.</p>
+    <span class="hook">Cosine similarity asks "same direction?", not "same size?".</span>
+  </div>
+  <details class="check">
+    <summary>Try it yourself <span class="reveal-hint">(click to reveal the answer)</span></summary>
+    <div class="check-q">Find $\cos\theta$ between $(1, 0)$ and $(1, 1)$.</div>
+    <div class="check-a">Dot product $= 1$. Lengths: $1$ and $\sqrt{2}$. $\cos\theta = 1/\sqrt{2} \approx 0.707$, so $\theta = 45°$, which matches the picture of a diagonal.</div>
+  </details>
+</section>
+
+<section id="s5" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">⟂</span><h2>Orthogonality: completely unrelated directions</h2><span class="module-time">≈ 10 min</span></div>
+  <p>Two vectors are <dfn>orthogonal</dfn> (perpendicular) when their dot product is 0, because then $\cos\theta = 0$ and $\theta = 90°$.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · is $(1, 2)$ perpendicular to $(2, -1)$?</span>
+    <ol class="steps">
+      <li><div class="step-math">$1\cdot2 + 2\cdot(-1) = 2 - 2 = 0$</div><div class="step-why">Dot product.</div></li>
+    </ol>
+    <div class="result">Yes. Zero dot product means a 90° angle.</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Walking north doesn't move you east at all: north and east are orthogonal. In data, orthogonal features carry completely separate information, which is ideal: each tells you something the others can't. Noise-cancelling headphones and Wi-Fi both rely on signals that are orthogonal so they don't interfere.</p>
+    <span class="hook">Dot product zero = no overlap at all.</span>
+  </div>
+</section>
+
+<section id="review" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">✅</span><h2>Check your understanding</h2></div>
+  <div class="q-card" data-explain="$\sqrt{6^2 + 8^2} = \sqrt{100} = 10$.">
+    <div class="q-stem"><span class="q-num">1.</span>What is $\lVert(6, 8)\rVert_2$?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-why="That's the ℓ1 (taxi) norm.">14</button>
+      <button class="q-opt" data-correct>10</button>
+      <button class="q-opt" data-why="That's the ℓ∞ (max) norm.">8</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="$2(3) + 3(-2) = 6 - 6 = 0$, so they're perpendicular.">
+    <div class="q-stem"><span class="q-num">2.</span>Are $(2, 3)$ and $(3, -2)$ orthogonal?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-correct>Yes</button>
+      <button class="q-opt" data-why="Compute the dot product.">No</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="Cosine similarity divides by both lengths, so a document and its copy pasted twice have similarity 1.">
+    <div class="q-stem"><span class="q-num">3.</span>Why do search engines prefer cosine similarity to plain distance when comparing documents?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-correct>It ignores document length and compares topic only</button>
+      <button class="q-opt" data-why="Both are quick to compute; that's not the reason.">It's faster to compute</button>
+      <button class="q-opt" data-why="It does use word counts; it just normalizes them.">It ignores the words</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="glossary" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">📖</span><h2>Key terms</h2></div>
+  <dl class="glossary">
+    <dt>Norm</dt><dd>A measure of a vector's length; ℓ2 is straight-line length.</dd>
+    <dt>Dot product</dt><dd>Multiply matching entries and add: $\mathbf{x}\cdot\mathbf{y} = \sum_i x_i y_i$.</dd>
+    <dt>Cosine similarity</dt><dd>$\frac{\mathbf{x}\cdot\mathbf{y}}{\lVert\mathbf{x}\rVert\lVert\mathbf{y}\rVert}$: 1 for same direction, 0 for perpendicular.</dd>
+    <dt>Orthogonal</dt><dd>Perpendicular; dot product equals 0.</dd>
+    <dt>Lasso</dt><dd>A model penalized with the ℓ1 norm, which zeroes out unimportant features.</dd>
+  </dl>
+</section>
+
+<nav class="lesson-nav" aria-label="Lesson navigation">
+  <a class="nav-btn" href="module02.html"><small>Previous</small>← Module 2: Vector Spaces</a>
+  <a class="nav-btn next" href="module04.html"><small>Next</small>Module 4: Projections →</a>
+</nav>
+
+</main></div>
+<footer>MathMatrix AI &nbsp;|&nbsp; Curriculum by Clark Ngo<br>Every worked example on this page was checked numerically.</footer>
+</body>
+</html>

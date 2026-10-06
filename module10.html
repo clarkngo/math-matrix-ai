@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 10: Probabilistic Modeling &amp; Graphical Models | MathMatrix AI</title>
+<meta name="description" content="Maximum likelihood, MAP, why least squares and ridge regression come from probability, and graphical models, step by step with real-life uses.">
+<script>window.MathJax = { tex: { inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]] }, svg: { fontCache: "global" } };</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg-full.min.js"></script>
+<link rel="stylesheet" href="assets/lesson.css">
+<script src="assets/lesson.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div class="topbar"><div class="topbar-inner">
+  <a href="index.html" class="back-link">← Course Home</a>
+  <span class="topbar-inst">MathMatrix AI · Clark Ngo</span>
+</div></div>
+
+<header class="lesson-header"><div class="header-inner">
+  <span class="eyebrow">Module 10 · Capstone</span>
+  <h1>Probabilistic Modeling, Parameter Estimation &amp; Graphical Models</h1>
+  <p class="tagline">Everything comes together: fitting a model means choosing the parameters that make your data most probable, and a prior belief is what keeps the model from overreacting.</p>
+  <div class="meta-row">
+    <span>📊 Intermediate</span><span>⏱ ~2.5 hours</span><span>🧮 Needs: Modules 4, 7, 8, 9</span>
+    <div class="header-actions"><button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button></div>
+  </div>
+</div></header>
+
+<nav class="section-nav" aria-label="Lesson sections"><div class="section-nav-inner">
+  <a href="#overview">Overview</a>
+  <a href="#s1">Maximum Likelihood</a>
+  <a href="#s2">Adding a Prior (MAP)</a>
+  <a href="#s3">Why Least Squares</a>
+  <a href="#s4">Ridge = Prior</a>
+  <a href="#s5">Graphical Models</a>
+  <a href="#review">Review</a>
+</div></nav>
+
+<div class="layout"><main id="main">
+
+<section id="overview" class="module overview-box">
+  <h2>Lesson overview</h2>
+  <p>Earlier modules treated regression as geometry (a projection) and as optimization (walking downhill). This module shows the third view: probability. Once you see that "least squares" is really "assume Gaussian noise and pick the most likely parameters", you can design models for any kind of data by choosing what kind of randomness to assume.</p>
+  <h3>By the end of this module you will be able to</h3>
+  <ul class="lo-display">
+    <li>Find a maximum-likelihood estimate for a coin from data.</li>
+    <li>Add a prior and compute a MAP estimate.</li>
+    <li>Show why Gaussian noise leads to least squares.</li>
+    <li>Explain ridge regression as a prior belief that parameters are small.</li>
+    <li>Read a simple graphical model and compute a probability with it.</li>
+  </ul>
+  <div class="need-grid">
+    <div class="need-card"><b>You need</b>Bayes and the product rule (Module 7); the Gaussian (Module 8); setting a derivative to zero (Module 9).</div>
+    <div class="need-card"><b>This unlocks</b>Logistic regression, Bayesian methods, and modern generative AI, which is all built on likelihoods.</div>
+  </div>
+</section>
+
+<section id="s1" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🪙</span><h2>Maximum likelihood: which setting best explains the data?</h2><span class="module-time">≈ 25 min</span></div>
+  <p>You flip a coin 10 times and get 7 heads. If the coin's chance of heads is $p$, the probability of seeing exactly this sequence is $p^7(1 - p)^3$ (product rule: 7 heads and 3 tails, each flip independent). That expression, read as a function of $p$, is the <dfn>likelihood</dfn>. The <dfn>maximum likelihood estimate</dfn> (MLE) is the $p$ that makes it largest.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · try a few values, then solve exactly</span>
+    <ol class="steps">
+      <li><div class="step-math">$p = 0.5:\; 0.5^7 \times 0.5^3 \approx 0.00098$</div><div class="step-why">A fair coin can produce 7 heads, but it's not the best explanation.</div></li>
+      <li><div class="step-math">$p = 0.7:\; 0.7^7 \times 0.3^3 \approx 0.00222$</div><div class="step-why">More than twice as likely.</div></li>
+      <li><div class="step-math">$p = 0.9:\; 0.9^7 \times 0.1^3 \approx 0.00048$</div><div class="step-why">Too extreme: 3 tails would be surprising.</div></li>
+      <li><div class="step-math">Log-likelihood: $\;7\ln p + 3\ln(1 - p)$</div><div class="step-why">Taking the log turns products into sums (easier to differentiate) and doesn't move the peak.</div></li>
+      <li><div class="step-math">Derivative $= \dfrac{7}{p} - \dfrac{3}{1 - p} = 0 \;\Rightarrow\; 7(1 - p) = 3p \;\Rightarrow\; p = 0.7$</div><div class="step-why">Set the slope to zero (Module 9) and solve with algebra.</div></li>
+    </ol>
+    <div class="result">MLE: $\hat{p} = 7/10 = 0.7$, the fraction of heads. The math confirms the common-sense answer.</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>A basketball player makes 7 of 10 free throws; the MLE of their skill is 70%. An online ad gets 30 clicks from 1,000 views; the MLE of its click-through rate is 3%. Most models you'll train, including large AI models, are fit by maximizing likelihood: "pick the settings under which the data we saw would be least surprising."</p>
+    <span class="hook">Likelihood asks: "If this were the truth, how unsurprising would my data be?"</span>
+  </div>
+</section>
+
+<section id="s2" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🧠</span><h2>Adding prior knowledge: MAP estimation</h2><span class="module-time">≈ 20 min</span></div>
+  <p>MLE trusts the data completely. With only 10 flips, that can be risky. <dfn>MAP</dfn> (maximum a posteriori) estimation uses Bayes' theorem (Module 7) to combine the likelihood with a <dfn>prior</dfn>, what you believed before seeing data.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · a mild belief that coins are usually fair</span>
+    <p>A simple way to encode "probably near 50/50" is to pretend you already saw 1 extra head and 1 extra tail before flipping.</p>
+    <ol class="steps">
+      <li><div class="step-math">Heads: $7 + 1 = 8$; total: $10 + 2 = 12$</div><div class="step-why">Add the imaginary flips from the prior.</div></li>
+      <li><div class="step-math">$\hat{p}_{\text{MAP}} = 8/12 \approx 0.667$</div><div class="step-why">Pulled slightly from 0.7 toward 0.5.</div></li>
+      <li><div class="step-math">After 1,000 flips with 700 heads: $701/1002 \approx 0.6996$</div><div class="step-why">With lots of data, the prior barely matters.</div></li>
+    </ol>
+    <div class="result">The prior matters a lot when data is scarce and fades as data grows.</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>A new restaurant with one 5-star review isn't really better than one averaging 4.6 stars over 2,000 reviews. Sensible rating systems blend each item's reviews with a prior (the average across all restaurants) so that a single lucky review can't push a newcomer to the top. Sports analysts do the same for a rookie who starts the season 4-for-4.</p>
+    <span class="hook">MAP = data + common sense. Little data leans on the prior; lots of data overrides it.</span>
+  </div>
+</section>
+
+<section id="s3" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">📉</span><h2>Why least squares? Because of Gaussian noise</h2><span class="module-time">≈ 25 min</span></div>
+  <p>Assume each data point is the true line plus Gaussian noise (Module 8): $y_n = \theta x_n + \text{noise}$, with noise $\sim \mathcal{N}(0, \sigma^2)$. Let's find the most likely $\theta$.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · from likelihood to squared error</span>
+    <ol class="steps">
+      <li><div class="step-math">$p(y_n \mid \theta) \propto e^{-\frac{(y_n - \theta x_n)^2}{2\sigma^2}}$</div><div class="step-why">The Gaussian density, centered on the line's prediction. ($\propto$ means "proportional to": we drop constants that don't depend on $\theta$.)</div></li>
+      <li><div class="step-math">$\text{Likelihood} = \prod_n p(y_n \mid \theta)$</div><div class="step-why">Independent points multiply (product rule).</div></li>
+      <li><div class="step-math">$\ln(\text{Likelihood}) = -\dfrac{1}{2\sigma^2}\sum_n (y_n - \theta x_n)^2 + \text{const}$</div><div class="step-why">The log turns the product into a sum, and $\ln e^{a} = a$.</div></li>
+      <li><div class="step-math">Maximize log-likelihood $\iff$ minimize $\sum_n (y_n - \theta x_n)^2$</div><div class="step-why">The minus sign flips "biggest" into "smallest".</div></li>
+    </ol>
+    <div class="result">Least squares is maximum likelihood with Gaussian noise. That's why squared error is the default.</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Your phone's GPS gives slightly different readings each second, scattered around your true position like a bell curve. Averaging them (which is the least-squares answer) gives the most likely true position. If you instead expected occasional wild readings, such as from tall buildings reflecting the signal, a different noise assumption gives a different, more robust error measure.</p>
+    <span class="hook">Your choice of error measure is secretly your assumption about the noise.</span>
+  </div>
+</section>
+
+<section id="s4" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🎯</span><h2>Ridge regression is a prior belief</h2><span class="module-time">≈ 20 min</span></div>
+  <p>Add a Gaussian prior that says "$\theta$ is probably small": $\theta \sim \mathcal{N}(0, b^2)$. Repeating the steps above for MAP adds one term:</p>
+  $$\text{minimize}\quad \sum_n (y_n - \theta x_n)^2 + \lambda\,\theta^2, \qquad \lambda = \frac{\sigma^2}{b^2}.$$
+  <p>That's <dfn>ridge regression</dfn>. The penalty $\lambda\theta^2$ is the prior in disguise.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · line through the origin, points $(1, 1)$, $(2, 2)$, $(3, 2)$</span>
+    <ol class="steps">
+      <li><div class="step-math">$\sum x_n y_n = 1 + 4 + 6 = 11, \quad \sum x_n^2 = 1 + 4 + 9 = 14$</div><div class="step-why">The two sums we need.</div></li>
+      <li><div class="step-math">Least squares: $\theta = \dfrac{\sum x y}{\sum x^2} = \dfrac{11}{14} \approx 0.786$</div><div class="step-why">Set the derivative of $\sum(y - \theta x)^2$ to zero: $-2\sum x(y - \theta x) = 0$.</div></li>
+      <li><div class="step-math">Ridge with $\lambda = 1$: $\theta = \dfrac{\sum x y}{\sum x^2 + \lambda} = \dfrac{11}{15} \approx 0.733$</div><div class="step-why">Same derivative plus $2\lambda\theta$ from the penalty. The $\lambda$ lands in the denominator.</div></li>
+    </ol>
+    <div class="result">The prior shrinks the slope toward 0. A bigger $\lambda$ means a stronger belief, and more shrinking.</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>If a stock went up three days in a row, a sensible forecast doesn't predict it will rise forever at that rate. Shrinking estimates toward zero protects against <dfn>overfitting</dfn>: memorizing noise in a small dataset instead of learning the real pattern. Nearly every production ML model uses some form of this.</p>
+    <span class="hook">Regularization = a prior that says "don't get carried away".</span>
+  </div>
+</section>
+
+<section id="s5" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🕸️</span><h2>Graphical models: drawing what causes what</h2><span class="module-time">≈ 30 min</span></div>
+  <p>A <dfn>graphical model</dfn> is a diagram of how variables depend on each other. Arrows point from a variable to the things it directly influences. The diagram tells you how to break a complicated probability into small pieces.</p>
+  <figure class="figure">
+    <svg viewBox="0 0 300 150" width="300" role="img" aria-label="Rain and Sprinkler each have an arrow pointing to Wet Grass">
+      <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--text-muted)"/></marker></defs>
+      <g font-family="inherit" font-size="13" text-anchor="middle">
+        <rect x="20" y="15" width="100" height="36" rx="18" fill="var(--accent-light)" stroke="var(--accent)"/><text x="70" y="38" fill="var(--text)">Rain (R)</text>
+        <rect x="180" y="15" width="100" height="36" rx="18" fill="var(--accent-light)" stroke="var(--accent)"/><text x="230" y="38" fill="var(--text)">Sprinkler (S)</text>
+        <rect x="95" y="100" width="110" height="36" rx="18" fill="var(--surface2)" stroke="var(--accent)"/><text x="150" y="123" fill="var(--text)">Wet grass (W)</text>
+      </g>
+      <line x1="80" y1="51" x2="130" y2="98" stroke="var(--text-muted)" stroke-width="2" marker-end="url(#arr)"/>
+      <line x1="220" y1="51" x2="170" y2="98" stroke="var(--text-muted)" stroke-width="2" marker-end="url(#arr)"/>
+    </svg>
+    <figcaption>Rain and the sprinkler both cause wet grass. They don't affect each other.</figcaption>
+  </figure>
+  <p>The diagram says the joint probability factors as $p(R, S, W) = p(R)\,p(S)\,p(W \mid R, S)$. Use $p(R) = 0.2$, $p(S) = 0.1$, and grass is wet with probability 0.99 if both happen, 0.9 if only rain, 0.8 if only the sprinkler, and 0 if neither.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · the grass is wet. Did it rain?</span>
+    <ol class="steps">
+      <li><div class="step-math">Rain &amp; sprinkler: $0.2 \times 0.1 \times 0.99 = 0.0198$</div><div class="step-why">Each case uses the factorization: multiply along the diagram.</div></li>
+      <li><div class="step-math">Rain only: $0.2 \times 0.9 \times 0.9 = 0.162$</div><div class="step-why">$p(\text{no sprinkler}) = 0.9$.</div></li>
+      <li><div class="step-math">Sprinkler only: $0.8 \times 0.1 \times 0.8 = 0.064$</div><div class="step-why">$p(\text{no rain}) = 0.8$.</div></li>
+      <li><div class="step-math">$p(W) = 0.0198 + 0.162 + 0.064 + 0 = 0.2458$</div><div class="step-why">Add every way the grass can be wet.</div></li>
+      <li><div class="step-math">$p(R \mid W) = \dfrac{0.0198 + 0.162}{0.2458} \approx 0.74$</div><div class="step-why">Bayes: the share of wet-grass cases that involve rain.</div></li>
+      <li><div class="step-math">Now learn the sprinkler was on: $p(R \mid W, S) = \dfrac{0.2 \times 0.99}{0.2 \times 0.99 + 0.8 \times 0.8} \approx 0.24$</div><div class="step-why">The sprinkler already explains the wet grass, so rain becomes much less likely.</div></li>
+    </ol>
+    <div class="result">Wet grass makes rain likely (74%), but finding the sprinkler on drops it to 24%. This is called <dfn>explaining away</dfn>.</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Your car won't start. A dead battery and an empty tank are both possible causes. If you then notice the fuel gauge reads empty, a dead battery suddenly seems less likely, even though the gauge says nothing about the battery directly. Medical diagnosis systems, spam filters, and recommendation engines use diagrams like this to reason about hidden causes from visible symptoms.</p>
+    <span class="hook">Arrows show what influences what; multiply along them; when one cause is confirmed, the others fade.</span>
+  </div>
+  <div class="teach-note">
+    <span class="box-label">Careful</span>
+    <p>Arrows in a graphical model describe how the probabilities are organized. Whether they represent real causes is a separate question that data alone usually can't settle.</p>
+  </div>
+</section>
+
+<section id="review" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">✅</span><h2>Check your understanding</h2></div>
+  <div class="q-card" data-explain="For coin flips, the MLE is just the observed fraction: $3/20 = 0.15$.">
+    <div class="q-stem"><span class="q-num">1.</span>A website gets 3 sign-ups from 20 visitors. What's the MLE of the sign-up rate?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-correct>0.15</button>
+      <button class="q-opt" data-why="That's the MAP estimate with one imaginary success and one failure added: $4/22$.">0.18</button>
+      <button class="q-opt" data-why="That ignores the data.">0.5</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="Gaussian noise gives a log-likelihood that's minus the sum of squared errors, so maximizing it is the same as least squares.">
+    <div class="q-stem"><span class="q-num">2.</span>Least-squares regression is maximum likelihood under which noise assumption?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-why="Uniform noise leads to a different error measure.">Uniform noise</button>
+      <button class="q-opt" data-correct>Gaussian noise</button>
+      <button class="q-opt" data-why="Least squares assumes there is noise; it just has to be bell-shaped.">No noise</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="Ridge adds a penalty on large parameters, which is the same as a Gaussian prior centered at zero.">
+    <div class="q-stem"><span class="q-num">3.</span>Ridge regression's penalty $\lambda\theta^2$ corresponds to…</div>
+    <div class="q-opts">
+      <button class="q-opt" data-correct>a prior belief that parameters are near zero</button>
+      <button class="q-opt" data-why="The penalty is about the parameters, not the data's noise.">more noise in the data</button>
+      <button class="q-opt" data-why="It's a belief about parameters, not a learning-rate choice.">a larger learning rate</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="glossary" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">📖</span><h2>Key terms</h2></div>
+  <dl class="glossary">
+    <dt>Likelihood</dt><dd>The probability of the observed data, viewed as a function of the parameters.</dd>
+    <dt>MLE</dt><dd>The parameters that make the observed data most probable.</dd>
+    <dt>Prior</dt><dd>What you believe about parameters before seeing data.</dd>
+    <dt>MAP</dt><dd>The parameters that maximize likelihood × prior.</dd>
+    <dt>Ridge regression</dt><dd>Least squares plus $\lambda\theta^2$; equivalent to a Gaussian prior.</dd>
+    <dt>Overfitting</dt><dd>Fitting noise in the training data instead of the real pattern.</dd>
+    <dt>Graphical model</dt><dd>A diagram showing which variables directly depend on which.</dd>
+  </dl>
+</section>
+
+<nav class="lesson-nav" aria-label="Lesson navigation">
+  <a class="nav-btn" href="module09.html"><small>Previous</small>← Module 9: Gradient Descent</a>
+  <a class="nav-btn next" href="index.html"><small>Finished</small>Back to Course Home →</a>
+</nav>
+
+</main></div>
+<footer>MathMatrix AI &nbsp;|&nbsp; Curriculum by Clark Ngo<br>Every worked example on this page was checked numerically.</footer>
+</body>
+</html>

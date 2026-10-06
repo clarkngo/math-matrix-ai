@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 6: Partial Derivatives &amp; Gradients | MathMatrix AI</title>
+<meta name="description" content="Partial derivatives, the gradient, the chain rule, and backpropagation, step by step from algebra with real-life uses.">
+<script>window.MathJax = { tex: { inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]] }, svg: { fontCache: "global" } };</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg-full.min.js"></script>
+<link rel="stylesheet" href="assets/lesson.css">
+<script src="assets/lesson.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div class="topbar"><div class="topbar-inner">
+  <a href="index.html" class="back-link">← Course Home</a>
+  <span class="topbar-inst">MathMatrix AI · Clark Ngo</span>
+</div></div>
+
+<header class="lesson-header"><div class="header-inner">
+  <span class="eyebrow">Module 6 · Vector Calculus</span>
+  <h1>Partial Differentiation &amp; Vector Gradients</h1>
+  <p class="tagline">A derivative is the slope of a curve. A gradient is the slope of a landscape: it points straight uphill, and training a model means walking the other way.</p>
+  <div class="meta-row">
+    <span>📊 Intermediate</span><span>⏱ ~2 hours</span><span>🧮 Needs: Module 0 (derivatives), Module 1</span>
+    <div class="header-actions"><button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button></div>
+  </div>
+</div></header>
+
+<nav class="section-nav" aria-label="Lesson sections"><div class="section-nav-inner">
+  <a href="#overview">Overview</a>
+  <a href="#s1">Partial Derivatives</a>
+  <a href="#s2">The Gradient</a>
+  <a href="#s3">Chain Rule</a>
+  <a href="#s4">Backpropagation</a>
+  <a href="#s5">Matrix Shortcuts</a>
+  <a href="#review">Review</a>
+</div></nav>
+
+<div class="layout"><main id="main">
+
+<section id="overview" class="module overview-box">
+  <h2>Lesson overview</h2>
+  <p>A model's error depends on many parameters at once, sometimes billions. To improve the model, we need to know how the error changes when we nudge each parameter. That's a list of slopes, one per parameter, called the <dfn>gradient</dfn>. Every neural network is trained by computing gradients.</p>
+  <h3>By the end of this module you will be able to</h3>
+  <ul class="lo-display">
+    <li>Compute partial derivatives of a function of two variables.</li>
+    <li>Build the gradient vector and explain why it points uphill.</li>
+    <li>Use the chain rule on a function inside a function.</li>
+    <li>Do one step of backpropagation and gradient descent by hand.</li>
+    <li>Use a matrix-calculus shortcut and check it by expanding.</li>
+  </ul>
+  <div class="need-grid">
+    <div class="need-card"><b>You need</b>The power rule and slopes (Module 0); vectors.</div>
+    <div class="need-card"><b>This unlocks</b>Gradient descent (Module 9) and how neural networks learn.</div>
+  </div>
+</section>
+
+<section id="s1" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🧭</span><h2>Partial derivatives: change one thing at a time</h2><span class="module-time">≈ 20 min</span></div>
+  <p>For a function of two variables, like $f(x, y) = x^2y + 3y$, ask two separate questions: how fast does $f$ change if I nudge only $x$? And only $y$? Each answer is a <dfn>partial derivative</dfn>, written with a curly $\partial$.</p>
+  <p>The trick: <strong>treat the other variable as a constant number</strong>, then use the ordinary rules from Module 0.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · $f(x, y) = x^2 y + 3y$ at the point $(1, 2)$</span>
+    <ol class="steps">
+      <li><div class="step-math">$\dfrac{\partial f}{\partial x} = 2x\cdot y + 0 = 2xy$</div><div class="step-why">Treat $y$ like a number such as 5: $x^2\cdot5$ becomes $2x\cdot5$. The $3y$ term has no $x$, so it's a constant and its slope is 0.</div></li>
+      <li><div class="step-math">$\dfrac{\partial f}{\partial y} = x^2 + 3$</div><div class="step-why">Now treat $x$ as the constant: $x^2 y$ is "(a number) times $y$", whose slope is that number, $x^2$. And $3y$ has slope 3.</div></li>
+      <li><div class="step-math">At $(1, 2)$: $\;\dfrac{\partial f}{\partial x} = 2(1)(2) = 4, \quad \dfrac{\partial f}{\partial y} = 1 + 3 = 4$</div><div class="step-why">Plug in the point.</div></li>
+    </ol>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>A farmer's crop yield depends on water and fertilizer. "If I add a bit more water but keep fertilizer the same, how much more corn do I get?" is a partial derivative. Economists call this the <em>marginal</em> effect, and it's the basis of every "all else being equal" claim.</p>
+    <span class="hook">Partial derivative = turn one knob, freeze all the others.</span>
+  </div>
+  <details class="check">
+    <summary>Try it yourself <span class="reveal-hint">(click to reveal the answer)</span></summary>
+    <div class="check-q">For $g(x, y) = 3x + xy^2$, find $\partial g/\partial x$ and $\partial g/\partial y$.</div>
+    <div class="check-a">$\partial g/\partial x = 3 + y^2$ (treat $y^2$ as a constant multiplier of $x$). $\partial g/\partial y = 2xy$ (the $3x$ term has no $y$).</div>
+  </details>
+</section>
+
+<section id="s2" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">⛰️</span><h2>The gradient: the uphill arrow</h2><span class="module-time">≈ 20 min</span></div>
+  <p>Stack all the partial derivatives into a vector and you get the <dfn>gradient</dfn>, written $\nabla f$ ("grad f"):</p>
+  $$\nabla f = \left(\frac{\partial f}{\partial x},\; \frac{\partial f}{\partial y}\right).$$
+  <p>It's an arrow that points in the direction where $f$ increases fastest. Its length tells you how steep that is.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · the bowl $f(x, y) = x^2 + y^2$ at $(1, 2)$</span>
+    <ol class="steps">
+      <li><div class="step-math">$\nabla f = (2x,\; 2y)$</div><div class="step-why">Each partial uses only the power rule.</div></li>
+      <li><div class="step-math">At $(1, 2)$: $\nabla f = (2, 4)$</div><div class="step-why">Points away from the bottom of the bowl at $(0, 0)$, which is uphill.</div></li>
+      <li><div class="step-math">Steepness $= \lVert(2, 4)\rVert = \sqrt{20} \approx 4.47$</div><div class="step-why">The uphill slope in that best direction.</div></li>
+      <li><div class="step-math">Downhill direction $= -\nabla f = (-2, -4)$</div><div class="step-why">Flip the arrow to head toward the minimum. This is the heart of gradient descent.</div></li>
+    </ol>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Stand on a hillside: the gradient is the direction of the steepest climb. Water runs the opposite way, straight down the gradient, which is why streams cross contour lines on a hiking map at right angles. Heat flows the same way, from hot to cold along the temperature gradient.</p>
+    <span class="hook">The gradient points uphill; water (and training) goes the opposite way.</span>
+  </div>
+</section>
+
+<section id="s3" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">⛓️</span><h2>The chain rule: rates multiply</h2><span class="module-time">≈ 20 min</span></div>
+  <p>When one function sits inside another, like $h(x) = (3x + 1)^2$, the slopes multiply: the outer slope (evaluated at the inner value) times the inner slope.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · $h(x) = (3x + 1)^2$ at $x = 1$</span>
+    <ol class="steps">
+      <li><div class="step-math">Inner: $u = 3x + 1$, slope $\dfrac{du}{dx} = 3$</div><div class="step-why">Name the inside piece.</div></li>
+      <li><div class="step-math">Outer: $h = u^2$, slope $\dfrac{dh}{du} = 2u$</div><div class="step-why">Power rule on the outside, treating $u$ as the variable.</div></li>
+      <li><div class="step-math">$\dfrac{dh}{dx} = 2u \cdot 3 = 6(3x + 1)$</div><div class="step-why">Multiply the two slopes, then put $u$ back.</div></li>
+      <li><div class="step-math">At $x = 1$: $6(4) = 24$</div><div class="step-why">Numerical check: $\frac{h(1.001) - h(1)}{0.001} \approx 24.009$ ✓.</div></li>
+    </ol>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>What does a road trip cost per hour? You drive 60 miles per hour, the car uses 1/30 gallon per mile, and gas is \$4 per gallon. The rates multiply along the chain:</p>
+    $$60\,\tfrac{\text{miles}}{\text{hour}} \times \tfrac{1}{30}\,\tfrac{\text{gallons}}{\text{mile}} \times 4\,\tfrac{\text{dollars}}{\text{gallon}} = 8\,\tfrac{\text{dollars}}{\text{hour}}.$$
+    <p>The units cancel exactly the way the $du$'s cancel in $\frac{dh}{du}\cdot\frac{du}{dx}$.</p>
+    <span class="hook">Chain rule = multiply the rates along the chain, like unit conversions.</span>
+  </div>
+</section>
+
+<section id="s4" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🤖</span><h2>Backpropagation: one learning step by hand</h2><span class="module-time">≈ 25 min</span></div>
+  <p>The simplest possible "model" predicts $\hat{y} = w\,x$ with one parameter $w$. Its error on one example is the squared loss $L = (wx - y)^2$. <dfn>Backpropagation</dfn> is just the chain rule applied to this, working backward from the loss to the parameter.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · input $x = 2$, true answer $y = 10$, current $w = 3$</span>
+    <ol class="steps">
+      <li><div class="step-math">Forward: $\hat{y} = 3 \times 2 = 6$, error $= 6 - 10 = -4$, $L = (-4)^2 = 16$</div><div class="step-why">Make a prediction and measure how wrong it is.</div></li>
+      <li><div class="step-math">$\dfrac{\partial L}{\partial \hat{y}} = 2(\hat{y} - y) = 2(-4) = -8$</div><div class="step-why">Backward, step 1: how the loss responds to the prediction (outer slope).</div></li>
+      <li><div class="step-math">$\dfrac{\partial \hat{y}}{\partial w} = x = 2$</div><div class="step-why">Backward, step 2: how the prediction responds to the weight (inner slope).</div></li>
+      <li><div class="step-math">$\dfrac{\partial L}{\partial w} = -8 \times 2 = -16$</div><div class="step-why">Chain rule. Negative means increasing $w$ lowers the loss.</div></li>
+      <li><div class="step-math">Update with step size $0.1$: $\; w \leftarrow 3 - 0.1 \times (-16) = 4.6$</div><div class="step-why">Step against the gradient (downhill).</div></li>
+      <li><div class="step-math">New prediction $4.6 \times 2 = 9.2$, new loss $(9.2 - 10)^2 = 0.64$</div><div class="step-why">The loss fell from 16 to 0.64 in one step.</div></li>
+    </ol>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Adjusting a shower: too cold, so you turn the handle toward hot, more if it's very cold, less if it's nearly right. That's a gradient step: the size of the correction depends on how wrong you are. A neural network does this for billions of "handles" at once, using backpropagation to work out how much each one contributed to the error.</p>
+    <span class="hook">Forward to measure the error; backward to blame each parameter; then nudge.</span>
+  </div>
+</section>
+
+<section id="s5" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">📦</span><h2>Matrix shortcuts (and how to trust them)</h2><span class="module-time">≈ 15 min</span></div>
+  <p>ML papers use compact rules like $\nabla_{\mathbf{x}}(\mathbf{x}^\top A\mathbf{x}) = (A + A^\top)\mathbf{x}$. Don't memorize them blindly; you can always check one by expanding a small case.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · check the rule with $A = \begin{bmatrix}2&1\\1&3\end{bmatrix}$</span>
+    <ol class="steps">
+      <li><div class="step-math">$\mathbf{x}^\top A\mathbf{x} = 2x_1^2 + 2x_1x_2 + 3x_2^2$</div><div class="step-why">Multiply out: $x_1(2x_1 + x_2) + x_2(x_1 + 3x_2)$.</div></li>
+      <li><div class="step-math">$\dfrac{\partial}{\partial x_1} = 4x_1 + 2x_2, \quad \dfrac{\partial}{\partial x_2} = 2x_1 + 6x_2$</div><div class="step-why">Ordinary partial derivatives.</div></li>
+      <li><div class="step-math">$(A + A^\top)\mathbf{x} = \begin{bmatrix}4&2\\2&6\end{bmatrix}\begin{bmatrix}x_1\\x_2\end{bmatrix} = \begin{bmatrix}4x_1 + 2x_2\\2x_1 + 6x_2\end{bmatrix}$ ✓</div><div class="step-why">The shortcut matches.</div></li>
+    </ol>
+  </div>
+  <div class="teach-note">
+    <span class="box-label">Shape check</span>
+    <p>A gradient always has the same shape as the thing you're differentiating with respect to. If $\mathbf{x}$ has 2 entries, $\nabla_{\mathbf{x}}f$ has 2 entries. Checking shapes catches most mistakes in ML math.</p>
+  </div>
+</section>
+
+<section id="review" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">✅</span><h2>Check your understanding</h2></div>
+  <div class="q-card" data-explain="Treat $y$ as a constant: the derivative of $5xy$ with respect to $x$ is $5y$, and $y^2$ contributes 0.">
+    <div class="q-stem"><span class="q-num">1.</span>For $f(x, y) = 5xy + y^2$, what is $\partial f/\partial x$?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-correct>$5y$</button>
+      <button class="q-opt" data-why="That's $\partial f / \partial y$.">$5x + 2y$</button>
+      <button class="q-opt" data-why="The $y^2$ term has no $x$, so it disappears.">$5y + 2y$</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="The gradient points uphill, so to make the loss smaller we step in $-\nabla L$.">
+    <div class="q-stem"><span class="q-num">2.</span>To make a loss smaller, step in which direction?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-why="That's uphill.">$+\nabla L$</button>
+      <button class="q-opt" data-correct>$-\nabla L$</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="Inner slope 2, outer slope $3u^2$; at $x = 1$, $u = 3$, so $3(9)(2) = 54$.">
+    <div class="q-stem"><span class="q-num">3.</span>What is the derivative of $(2x + 1)^3$ at $x = 1$?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-why="You need to multiply by the inner slope, 2.">27</button>
+      <button class="q-opt" data-correct>54</button>
+      <button class="q-opt" data-why="Check the outer slope: $3u^2$ with $u = 3$.">18</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="glossary" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">📖</span><h2>Key terms</h2></div>
+  <dl class="glossary">
+    <dt>Partial derivative</dt><dd>The slope with respect to one variable, holding the others fixed.</dd>
+    <dt>Gradient</dt><dd>The vector of all partial derivatives; points in the steepest uphill direction.</dd>
+    <dt>Chain rule</dt><dd>For nested functions, multiply the outer slope by the inner slope.</dd>
+    <dt>Loss</dt><dd>A number measuring how wrong a model is, such as squared error.</dd>
+    <dt>Backpropagation</dt><dd>Applying the chain rule backward from the loss to every parameter.</dd>
+  </dl>
+</section>
+
+<nav class="lesson-nav" aria-label="Lesson navigation">
+  <a class="nav-btn" href="module05.html"><small>Previous</small>← Module 5: Eigenvalues</a>
+  <a class="nav-btn next" href="module07.html"><small>Next</small>Module 7: Probability →</a>
+</nav>
+
+</main></div>
+<footer>MathMatrix AI &nbsp;|&nbsp; Curriculum by Clark Ngo<br>Every worked example on this page was checked numerically.</footer>
+</body>
+</html>

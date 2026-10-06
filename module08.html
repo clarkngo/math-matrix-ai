@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 8: Gaussian Distributions &amp; Change of Variables | MathMatrix AI</title>
+<meta name="description" content="The bell curve, z-scores, covariance, transforming Gaussians, and change of variables, step by step with real-life uses.">
+<script>window.MathJax = { tex: { inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]] }, svg: { fontCache: "global" } };</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg-full.min.js"></script>
+<link rel="stylesheet" href="assets/lesson.css">
+<script src="assets/lesson.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div class="topbar"><div class="topbar-inner">
+  <a href="index.html" class="back-link">← Course Home</a>
+  <span class="topbar-inst">MathMatrix AI · Clark Ngo</span>
+</div></div>
+
+<header class="lesson-header"><div class="header-inner">
+  <span class="eyebrow">Module 8 · Probability</span>
+  <h1>Gaussian Distributions &amp; Change of Variables</h1>
+  <p class="tagline">The bell curve shows up everywhere: heights, test scores, measurement errors. Learn to read it, compare against it, and reshape it.</p>
+  <div class="meta-row">
+    <span>📊 Intermediate</span><span>⏱ ~2 hours</span><span>🧮 Needs: Modules 5 and 7</span>
+    <div class="header-actions"><button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button></div>
+  </div>
+</div></header>
+
+<nav class="section-nav" aria-label="Lesson sections"><div class="section-nav-inner">
+  <a href="#overview">Overview</a>
+  <a href="#s1">The Bell Curve</a>
+  <a href="#s2">z-Scores</a>
+  <a href="#s3">Shifting &amp; Scaling</a>
+  <a href="#s4">Two Variables</a>
+  <a href="#s5">Change of Variables</a>
+  <a href="#review">Review</a>
+</div></nav>
+
+<div class="layout"><main id="main">
+
+<section id="overview" class="module overview-box">
+  <h2>Lesson overview</h2>
+  <p>The <dfn>Gaussian</dfn> (or <dfn>normal</dfn>) distribution is the bell-shaped curve. Two numbers describe it completely: the mean $\mu$ (where the center is) and the standard deviation $\sigma$ (how wide it is). It's the default assumption for noise in almost every ML model, and Module 10 shows that assuming it leads directly to least-squares regression.</p>
+  <h3>By the end of this module you will be able to</h3>
+  <ul class="lo-display">
+    <li>Use the 68–95–99.7 rule to estimate probabilities.</li>
+    <li>Compute z-scores to compare values on different scales.</li>
+    <li>Say what happens to $\mu$ and $\sigma$ when you shift and scale a variable.</li>
+    <li>Read a 2×2 covariance matrix as the shape of a point cloud.</li>
+    <li>Explain why a density changes height when you stretch it (change of variables).</li>
+  </ul>
+  <div class="need-grid">
+    <div class="need-card"><b>You need</b>Mean and variance (Module 7); eigenvectors (Module 5) for the 2D part.</div>
+    <div class="need-card"><b>This unlocks</b>Probabilistic regression (Module 10), Gaussian processes, and generative models.</div>
+  </div>
+</section>
+
+<section id="s1" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🔔</span><h2>The bell curve and the 68–95–99.7 rule</h2><span class="module-time">≈ 20 min</span></div>
+  <p>We write $X \sim \mathcal{N}(\mu, \sigma^2)$: "$X$ follows a normal distribution with mean $\mu$ and variance $\sigma^2$". The curve's height at each point is the <dfn>density</dfn>:</p>
+  $$p(x) = \frac{1}{\sigma\sqrt{2\pi}}\, e^{-\frac{(x - \mu)^2}{2\sigma^2}}.$$
+  <p>You rarely need the formula itself. Read it as: the further $x$ is from $\mu$ (measured in units of $\sigma$), the faster the height drops.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · adult heights with $\mu = 170$ cm, $\sigma = 10$ cm</span>
+    <ol class="steps">
+      <li><div class="step-math">About 68% fall within $\mu \pm \sigma$: between 160 and 180 cm</div><div class="step-why">One standard deviation either side.</div></li>
+      <li><div class="step-math">About 95% within $\mu \pm 2\sigma$: 150 to 190 cm</div><div class="step-why">Two standard deviations.</div></li>
+      <li><div class="step-math">About 99.7% within $\mu \pm 3\sigma$: 140 to 200 cm</div><div class="step-why">Almost everyone.</div></li>
+      <li><div class="step-math">Taller than 190 cm: $(100\% - 95\%) / 2 = 2.5\%$</div><div class="step-why">The 5% outside is split evenly between the two tails.</div></li>
+    </ol>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Factories use this for quality control. If bolts are meant to be 10 mm long with $\sigma = 0.1$ mm, almost every bolt (99.7%) will be between 9.7 and 10.3 mm. A bolt at 10.5 mm is 5 standard deviations off, so something has gone wrong with the machine. This is where the "Six Sigma" quality program got its name.</p>
+    <span class="hook">68–95–99.7: one, two, three steps of $\sigma$ from the middle.</span>
+  </div>
+</section>
+
+<section id="s2" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">📊</span><h2>z-scores: comparing apples and oranges</h2><span class="module-time">≈ 15 min</span></div>
+  <p>A <dfn>z-score</dfn> says how many standard deviations a value is from the mean: $z = \dfrac{x - \mu}{\sigma}$. It converts any normal variable to the standard one, $\mathcal{N}(0, 1)$.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · how unusual is 185 cm?</span>
+    <ol class="steps">
+      <li><div class="step-math">$z = \dfrac{185 - 170}{10} = 1.5$</div><div class="step-why">15 cm above average, and each $\sigma$ is 10 cm.</div></li>
+      <li><div class="step-math">Between $z = 1$ (84th percentile) and $z = 2$ (97.5th)</div><div class="step-why">From the 68–95 rule: 50% + 34% below $z = 1$; 50% + 47.5% below $z = 2$.</div></li>
+    </ol>
+    <div class="result">A z-table gives about the 93rd percentile: taller than roughly 93% of people.</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Which is better: 1300 on a test with mean 1050 and $\sigma = 200$, or 27 on a test with mean 21 and $\sigma = 5$? The z-scores are $\frac{1300 - 1050}{200} = 1.25$ and $\frac{27 - 21}{5} = 1.2$, so the first is slightly stronger. In ML, "standardizing" every feature to z-scores is a standard first step, so features measured in dollars and in years can be compared fairly.</p>
+    <span class="hook">A z-score answers: "how many $\sigma$'s from normal?"</span>
+  </div>
+</section>
+
+<section id="s3" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">↔️</span><h2>Shifting and scaling a Gaussian</h2><span class="module-time">≈ 15 min</span></div>
+  <p>If $X \sim \mathcal{N}(\mu, \sigma^2)$ and $Y = aX + b$, then $Y$ is also normal, with</p>
+  $$\text{mean } a\mu + b, \qquad \text{standard deviation } |a|\sigma, \qquad \text{variance } a^2\sigma^2.$$
+  <div class="worked-example">
+    <span class="box-label">Worked example · $X \sim \mathcal{N}(0, 1)$ and $Y = 2X + 5$</span>
+    <ol class="steps">
+      <li><div class="step-math">Mean: $2(0) + 5 = 5$</div><div class="step-why">Shifting by $b$ moves the center; scaling by $a$ scales it.</div></li>
+      <li><div class="step-math">Standard deviation: $2 \times 1 = 2$</div><div class="step-why">Adding 5 doesn't change the width; multiplying by 2 doubles it.</div></li>
+      <li><div class="step-math">Variance: $2^2 \times 1 = 4$</div><div class="step-why">Variance is in squared units, so it scales by $a^2$.</div></li>
+    </ol>
+    <div class="result">$Y \sim \mathcal{N}(5, 4)$</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Daily temperatures with mean 20 °C and $\sigma = 5$ °C, converted with $F = 1.8C + 32$, have mean $1.8(20) + 32 = 68$ °F and $\sigma = 1.8 \times 5 = 9$ °F. The +32 only shifts the center; the 1.8 stretches both the center and the spread.</p>
+    <span class="hook">Adding shifts the bell; multiplying stretches it.</span>
+  </div>
+</section>
+
+<section id="s4" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🫧</span><h2>Two variables: covariance and the tilted ellipse</h2><span class="module-time">≈ 25 min</span></div>
+  <p>With two variables, one number isn't enough to describe the spread. The <dfn>covariance matrix</dfn> $\Sigma$ holds each variable's variance on the diagonal and their <dfn>covariance</dfn> (how they move together) off the diagonal. A cloud of points from a 2D Gaussian forms an ellipse, and $\Sigma$'s eigenvectors (Module 5) are the ellipse's axes.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · $\Sigma = \begin{bmatrix}4&3\\3&4\end{bmatrix}$</span>
+    <ol class="steps">
+      <li><div class="step-math">Each variable has variance 4, so $\sigma = 2$</div><div class="step-why">Diagonal entries.</div></li>
+      <li><div class="step-math">Covariance $= 3 &gt; 0$</div><div class="step-why">Positive: when one is high, the other tends to be high. The cloud tilts up and to the right.</div></li>
+      <li><div class="step-math">Eigenvalues $4 \pm 3 = 7$ and $1$, with eigenvectors $(1, 1)$ and $(1, -1)$</div><div class="step-why">Same pattern as Module 5's $\begin{bmatrix}2&1\\1&2\end{bmatrix}$.</div></li>
+      <li><div class="step-math">Long axis along $(1, 1)$ with spread $\sqrt{7} \approx 2.65$; short axis along $(1, -1)$ with spread $1$</div><div class="step-why">A cigar-shaped cloud along the diagonal.</div></li>
+    </ol>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Height and weight have positive covariance: taller people tend to weigh more, so a scatter plot of the two is a tilted ellipse. Investors use covariance between stocks to build portfolios: combining stocks with low or negative covariance smooths out the ups and downs.</p>
+    <span class="hook">Diagonal = how much each one wobbles. Off-diagonal = whether they wobble together.</span>
+  </div>
+  <details class="check">
+    <summary>Try it yourself <span class="reveal-hint">(click to reveal the answer)</span></summary>
+    <div class="check-q">What shape is the cloud for $\Sigma = \begin{bmatrix}9&0\\0&1\end{bmatrix}$?</div>
+    <div class="check-a">Covariance 0, so no tilt. Spread $\sqrt{9} = 3$ horizontally and $1$ vertically: a flat ellipse lying along the x-axis, 3 times wider than it is tall.</div>
+  </details>
+</section>
+
+<section id="s5" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🧈</span><h2>Change of variables: stretching a density</h2><span class="module-time">≈ 20 min</span></div>
+  <p>When you transform a random variable, the total probability must still add up to 1. So if you stretch the values out, the density must get lower to compensate. The correction factor is the <dfn>Jacobian</dfn> (in 1D, just the stretch factor).</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · $X$ uniform on $[0, 1]$, and $Y = 2X$</span>
+    <ol class="steps">
+      <li><div class="step-math">$p_X(x) = 1$ on $[0, 1]$</div><div class="step-why">A flat density. Area $= 1 \times 1 = 1$ ✓.</div></li>
+      <li><div class="step-math">$Y$ ranges over $[0, 2]$</div><div class="step-why">Doubling every value doubles the width.</div></li>
+      <li><div class="step-math">$p_Y(y) = p_X(y/2) \times \tfrac{1}{2} = \tfrac{1}{2}$</div><div class="step-why">Undo the map ($x = y/2$), then multiply by the stretch correction $\frac{dx}{dy} = \frac{1}{2}$.</div></li>
+      <li><div class="step-math">Area $= 2 \times \tfrac{1}{2} = 1$ ✓</div><div class="step-why">Twice as wide, half as tall, same total.</div></li>
+    </ol>
+  </div>
+  <p>In several dimensions the stretch factor becomes $|\det J|$, the determinant of the Jacobian matrix, which is the same "area multiplier" idea as Module 5.</p>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Spread the same pat of butter over a slice of toast twice as long and the layer is half as thick. Population density works the same way: the same number of people spread over twice the area means half the people per square mile. AI image generators rely on this rule when they turn simple random noise into realistic images: every stretch or squeeze of the space must be tracked so probabilities still add to 1.</p>
+    <span class="hook">Same butter, bigger toast, thinner layer. The Jacobian keeps the total at 1.</span>
+  </div>
+</section>
+
+<section id="review" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">✅</span><h2>Check your understanding</h2></div>
+  <div class="q-card" data-explain="Within one $\sigma$ of the mean is 68%; between 40 and 60 is exactly $\mu \pm \sigma$ for $\mu = 50, \sigma = 10$.">
+    <div class="q-stem"><span class="q-num">1.</span>Scores are $\mathcal{N}(50, 10^2)$. About what share fall between 40 and 60?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-correct>68%</button>
+      <button class="q-opt" data-why="That's for $\mu \pm 2\sigma$, 30 to 70.">95%</button>
+      <button class="q-opt" data-why="That's only the upper half of the middle range.">34%</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="Standard deviation scales by $|a| = 3$; adding 7 doesn't change spread. So $\sigma_Y = 3 \times 2 = 6$.">
+    <div class="q-stem"><span class="q-num">2.</span>$X$ has $\sigma = 2$. What is the standard deviation of $Y = 3X + 7$?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-why="Adding 7 shifts the center but not the spread.">13</button>
+      <button class="q-opt" data-correct>6</button>
+      <button class="q-opt" data-why="That's the variance, $3^2 \times 2^2$.">36</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="Negative covariance means one tends to go down when the other goes up, so the cloud tilts down to the right.">
+    <div class="q-stem"><span class="q-num">3.</span>A covariance matrix has off-diagonal entry $-2$. The point cloud…</div>
+    <div class="q-opts">
+      <button class="q-opt" data-why="That's positive covariance.">tilts up to the right</button>
+      <button class="q-opt" data-correct>tilts down to the right</button>
+      <button class="q-opt" data-why="That's zero covariance.">has no tilt</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="glossary" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">📖</span><h2>Key terms</h2></div>
+  <dl class="glossary">
+    <dt>Gaussian / normal</dt><dd>The bell-shaped distribution $\mathcal{N}(\mu, \sigma^2)$.</dd>
+    <dt>z-score</dt><dd>$(x - \mu)/\sigma$: distance from the mean in standard deviations.</dd>
+    <dt>Covariance</dt><dd>How two variables move together; positive means up together.</dd>
+    <dt>Covariance matrix</dt><dd>Variances on the diagonal, covariances off it; describes the ellipse shape.</dd>
+    <dt>Jacobian</dt><dd>The stretch factor that corrects a density after a change of variables.</dd>
+  </dl>
+</section>
+
+<nav class="lesson-nav" aria-label="Lesson navigation">
+  <a class="nav-btn" href="module07.html"><small>Previous</small>← Module 7: Probability</a>
+  <a class="nav-btn next" href="module09.html"><small>Next</small>Module 9: Gradient Descent →</a>
+</nav>
+
+</main></div>
+<footer>MathMatrix AI &nbsp;|&nbsp; Curriculum by Clark Ngo<br>Every worked example on this page was checked numerically.</footer>
+</body>
+</html>

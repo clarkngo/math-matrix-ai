@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 7: Probability &amp; Bayes' Theorem | MathMatrix AI</title>
+<meta name="description" content="Probability rules, conditional probability, Bayes' theorem, expectation, and variance, step by step with real-life uses.">
+<script>window.MathJax = { tex: { inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]] }, svg: { fontCache: "global" } };</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg-full.min.js"></script>
+<link rel="stylesheet" href="assets/lesson.css">
+<script src="assets/lesson.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div class="topbar"><div class="topbar-inner">
+  <a href="index.html" class="back-link">← Course Home</a>
+  <span class="topbar-inst">MathMatrix AI · Clark Ngo</span>
+</div></div>
+
+<header class="lesson-header"><div class="header-inner">
+  <span class="eyebrow">Module 7 · Probability</span>
+  <h1>Probability Spaces, Rules &amp; Bayes' Theorem</h1>
+  <p class="tagline">How to reason about chance, and how to update what you believe when new evidence arrives. Counting people in a crowd makes it intuitive.</p>
+  <div class="meta-row">
+    <span>📊 Beginner–Intermediate</span><span>⏱ ~2 hours</span><span>🧮 Needs: fractions and percentages</span>
+    <div class="header-actions"><button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button></div>
+  </div>
+</div></header>
+
+<nav class="section-nav" aria-label="Lesson sections"><div class="section-nav-inner">
+  <a href="#overview">Overview</a>
+  <a href="#s1">Basic Rules</a>
+  <a href="#s2">Conditional</a>
+  <a href="#s3">Bayes' Theorem</a>
+  <a href="#s4">Expected Value</a>
+  <a href="#s5">ML: Spam Filter</a>
+  <a href="#review">Review</a>
+</div></nav>
+
+<div class="layout"><main id="main">
+
+<section id="overview" class="module overview-box">
+  <h2>Lesson overview</h2>
+  <p>Machine learning models rarely say "this email is spam". They say "this email is 87% likely to be spam". This module covers the rules for working with those numbers, and Bayes' theorem: the rule for updating a belief when you see evidence. It's the most useful, and most often misunderstood, formula in data science.</p>
+  <h3>By the end of this module you will be able to</h3>
+  <ul class="lo-display">
+    <li>Use the complement, sum, and product rules.</li>
+    <li>Compute a conditional probability from a table and see why $p(A \mid B) \ne p(B \mid A)$.</li>
+    <li>Apply Bayes' theorem by counting a crowd of 1,000 people.</li>
+    <li>Compute an expected value and a variance.</li>
+    <li>Explain how a basic spam filter decides.</li>
+  </ul>
+  <div class="need-grid">
+    <div class="need-card"><b>You need</b>Fractions, decimals, percentages; $\Sigma$ notation (Module 0).</div>
+    <div class="need-card"><b>This unlocks</b>The bell curve (Module 8) and fitting models with probability (Module 10).</div>
+  </div>
+</section>
+
+<section id="s1" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🎲</span><h2>The basic rules</h2><span class="module-time">≈ 20 min</span></div>
+  <p>A probability is a number from 0 (impossible) to 1 (certain). When every outcome is equally likely, it's just counting: $p(\text{event}) = \frac{\text{favorable outcomes}}{\text{all outcomes}}$.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · three rules with dice and coins</span>
+    <ol class="steps">
+      <li><div class="step-math">$p(\text{even on a die}) = \frac{3}{6} = 0.5$</div><div class="step-why">Favorable outcomes: 2, 4, 6. Total: 6.</div></li>
+      <li><div class="step-math">$p(\text{not a 6}) = 1 - \frac{1}{6} = \frac{5}{6}$</div><div class="step-why"><strong>Complement rule:</strong> $p(\text{not } A) = 1 - p(A)$. Often easier than counting directly.</div></li>
+      <li><div class="step-math">$p(\text{1 or 2}) = \frac{1}{6} + \frac{1}{6} = \frac{1}{3}$</div><div class="step-why"><strong>Sum rule:</strong> for outcomes that can't happen together, add.</div></li>
+      <li><div class="step-math">$p(\text{two heads in two flips}) = \frac{1}{2} \times \frac{1}{2} = \frac{1}{4}$</div><div class="step-why"><strong>Product rule:</strong> for independent events (one doesn't affect the other), multiply.</div></li>
+    </ol>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <ul>
+      <li>A 4-digit PIN has $10 \times 10 \times 10 \times 10 = 10{,}000$ possibilities, so a random guess succeeds with probability $\frac{1}{10{,}000}$. Each extra digit multiplies the difficulty by 10, which is why longer passwords are safer.</li>
+      <li>A 30% chance of rain means a 70% chance of no rain (complement rule).</li>
+    </ul>
+    <span class="hook">"Or" (when outcomes can't overlap) → add. "And" (when independent) → multiply. "Not" → subtract from 1.</span>
+  </div>
+</section>
+
+<section id="s2" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🔀</span><h2>Conditional probability: "given that…"</h2><span class="module-time">≈ 20 min</span></div>
+  <p>$p(A \mid B)$ means "the probability of $A$, <em>given that</em> we already know $B$ happened". Knowing $B$ shrinks the crowd you're counting to only the people where $B$ is true.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · 100 students</span>
+    <div class="table-scroll"><table class="symbol-table">
+      <thead><tr><th></th><th>Codes</th><th>Doesn't code</th><th>Total</th></tr></thead>
+      <tbody>
+        <tr><td>Likes math</td><td>30</td><td>10</td><td>40</td></tr>
+        <tr><td>Doesn't like math</td><td>20</td><td>40</td><td>60</td></tr>
+        <tr><td>Total</td><td>50</td><td>50</td><td>100</td></tr>
+      </tbody>
+    </table></div>
+    <ol class="steps">
+      <li><div class="step-math">$p(\text{codes} \mid \text{likes math}) = \frac{30}{40} = 0.75$</div><div class="step-why">Look only at the 40 math-likers. 30 of them code.</div></li>
+      <li><div class="step-math">$p(\text{likes math} \mid \text{codes}) = \frac{30}{50} = 0.60$</div><div class="step-why">Now look only at the 50 coders. 30 of them like math.</div></li>
+    </ol>
+    <div class="result">Same 30 students, different crowd: $0.75 \ne 0.60$. Flipping "given" changes the answer.</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>"Most professional basketball players are tall" is not the same as "most tall people are professional basketball players". $p(\text{tall} \mid \text{NBA})$ is close to 1; $p(\text{NBA} \mid \text{tall})$ is tiny. Mixing these up is behind many misleading headlines.</p>
+    <span class="hook">Always ask: "Out of <em>whom</em>?" The thing after the bar is the crowd you count.</span>
+  </div>
+</section>
+
+<section id="s3" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🩺</span><h2>Bayes' theorem: updating a belief with evidence</h2><span class="module-time">≈ 30 min</span></div>
+  <p>Bayes' theorem turns $p(\text{evidence} \mid \text{cause})$, which is usually easy to measure, into $p(\text{cause} \mid \text{evidence})$, which is what you actually want:</p>
+  $$p(A \mid B) = \frac{p(B \mid A)\,p(A)}{p(B)}.$$
+  <p>The formula is easy to misuse. Counting a crowd is much harder to get wrong, so start there.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · a medical test, by counting 1,000 people</span>
+    <p>A disease affects 1% of people. The test catches 90% of sick people, but also flags 9% of healthy people by mistake. You test positive. How likely is it that you're sick?</p>
+    <ol class="steps">
+      <li><div class="step-math">Sick: $1\% \times 1000 = 10$. Healthy: $990$.</div><div class="step-why">Start with the <dfn>base rate</dfn>, how common the disease is. This is $p(A)$, the <dfn>prior</dfn>.</div></li>
+      <li><div class="step-math">Sick and positive: $90\% \times 10 = 9$</div><div class="step-why">The test catches most sick people.</div></li>
+      <li><div class="step-math">Healthy but positive: $9\% \times 990 = 89.1 \approx 89$</div><div class="step-why">False alarms. A small rate applied to a big crowd gives a big number.</div></li>
+      <li><div class="step-math">Total positives: $9 + 89.1 = 98.1$</div><div class="step-why">Everyone who sees a positive result. This is $p(B)$.</div></li>
+      <li><div class="step-math">$p(\text{sick} \mid \text{positive}) = \dfrac{9}{98.1} \approx 0.092$</div><div class="step-why">Out of all positives, how many are really sick? This is the <dfn>posterior</dfn>.</div></li>
+    </ol>
+    <div class="result">Only about 9%, not 90%. Most positives are false alarms because the disease is rare.</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>This is why doctors order a second test after a positive screening, and why airport security alarms are mostly false. Fraud detection, smoke detectors, and facial recognition in a big crowd all face the same base-rate problem: when the thing you're looking for is rare, even a good detector produces mostly false alarms.</p>
+    <span class="hook">Rare things stay fairly unlikely even after a positive test. Always start from the base rate.</span>
+  </div>
+  <details class="check">
+    <summary>Try it yourself <span class="reveal-hint">(click to reveal the answer)</span></summary>
+    <div class="check-q">Same test, but now the disease affects 10% of people. What's $p(\text{sick} \mid \text{positive})$?</div>
+    <div class="check-a">Of 1,000 people: 100 sick, 900 healthy. True positives $0.9 \times 100 = 90$. False positives $0.09 \times 900 = 81$. Answer: $\frac{90}{90 + 81} = \frac{90}{171} \approx 0.53$. A more common disease makes a positive result much more meaningful.</div>
+  </details>
+</section>
+
+<section id="s4" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">⚖️</span><h2>Expected value and variance: average and spread</h2><span class="module-time">≈ 20 min</span></div>
+  <p>The <dfn>expected value</dfn> $\mathbb{E}[X]$ is the long-run average: multiply each outcome by its probability and add. The <dfn>variance</dfn> measures how spread out the outcomes are around that average.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · one roll of a die</span>
+    <ol class="steps">
+      <li><div class="step-math">$\mathbb{E}[X] = \frac{1}{6}(1 + 2 + 3 + 4 + 5 + 6) = \frac{21}{6} = 3.5$</div><div class="step-why">Each face has probability $\frac{1}{6}$. You can never roll 3.5, but it's the average over many rolls.</div></li>
+      <li><div class="step-math">$\mathbb{E}[X^2] = \frac{1}{6}(1 + 4 + 9 + 16 + 25 + 36) = \frac{91}{6} \approx 15.17$</div><div class="step-why">Average of the squared outcomes.</div></li>
+      <li><div class="step-math">$\text{Var}[X] = \mathbb{E}[X^2] - (\mathbb{E}[X])^2 = 15.17 - 12.25 \approx 2.92$</div><div class="step-why">Variance = mean of squares minus square of the mean.</div></li>
+      <li><div class="step-math">Standard deviation $= \sqrt{2.92} \approx 1.71$</div><div class="step-why">Back in the original units: rolls typically land about 1.7 away from 3.5.</div></li>
+    </ol>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>A \$2 lottery ticket with a 1-in-a-million chance of winning \$1,000,000 has expected winnings of $\frac{1}{1{,}000{,}000} \times 1{,}000{,}000 = \$1$, so on average you lose \$1 per ticket. Insurance companies price policies the same way. Variance is risk: two investments can have the same average return, but the one with higher variance swings more wildly.</p>
+    <span class="hook">Expected value = what you'd average in the long run. Variance = how bumpy the ride is.</span>
+  </div>
+</section>
+
+<section id="s5" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">📧</span><h2>Machine learning: a one-word spam filter</h2><span class="module-time">≈ 15 min</span></div>
+  <p>From past email: 40% of messages are spam. The word "free" appears in 50% of spam but only 5% of real email. A new email contains "free". Spam or not?</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · Bayes for spam</span>
+    <ol class="steps">
+      <li><div class="step-math">$p(\text{spam}) \cdot p(\text{"free"} \mid \text{spam}) = 0.4 \times 0.5 = 0.20$</div><div class="step-why">Share of all email that is spam <em>and</em> says "free".</div></li>
+      <li><div class="step-math">$p(\text{real}) \cdot p(\text{"free"} \mid \text{real}) = 0.6 \times 0.05 = 0.03$</div><div class="step-why">Share that is real <em>and</em> says "free".</div></li>
+      <li><div class="step-math">$p(\text{spam} \mid \text{"free"}) = \dfrac{0.20}{0.20 + 0.03} \approx 0.87$</div><div class="step-why">Among emails with "free", the spam share.</div></li>
+    </ol>
+    <div class="result">87% likely spam. A real <dfn>Naive Bayes</dfn> filter does this with hundreds of words at once, multiplying their evidence together.</div>
+  </div>
+  <div class="ml-box">
+    <span class="box-label">Why this matters for ML</span>
+    <p>Classifiers output probabilities, and Bayes' theorem is how you combine prior knowledge with new evidence. Module 10 extends this: fitting a model is finding parameters that make the observed data most probable.</p>
+  </div>
+</section>
+
+<section id="review" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">✅</span><h2>Check your understanding</h2></div>
+  <div class="q-card" data-explain="Independent events multiply: $\frac{1}{6} \times \frac{1}{6} = \frac{1}{36}$.">
+    <div class="q-stem"><span class="q-num">1.</span>What's the probability of rolling two sixes with two dice?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-why="That's adding instead of multiplying.">$\frac{2}{6}$</button>
+      <button class="q-opt" data-correct>$\frac{1}{36}$</button>
+      <button class="q-opt" data-why="That's the chance for one die.">$\frac{1}{6}$</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="A rare condition means false positives from the large healthy group outnumber the true positives.">
+    <div class="q-stem"><span class="q-num">2.</span>A test is 99% accurate, but the condition is very rare. A positive result means the person is…</div>
+    <div class="q-opts">
+      <button class="q-opt" data-why="That ignores the base rate.">99% likely to have it</button>
+      <button class="q-opt" data-correct>possibly much less likely than 99% to have it</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="$\frac{1}{2}(0) + \frac{1}{2}(10) = 5$.">
+    <div class="q-stem"><span class="q-num">3.</span>A game pays \$10 on heads and \$0 on tails. What's the expected payout?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-correct>\$5</button>
+      <button class="q-opt" data-why="That's the best case, not the average.">\$10</button>
+      <button class="q-opt" data-why="That's the worst case.">\$0</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="glossary" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">📖</span><h2>Key terms</h2></div>
+  <dl class="glossary">
+    <dt>Conditional probability</dt><dd>$p(A \mid B)$: the chance of $A$ among cases where $B$ is true.</dd>
+    <dt>Independent</dt><dd>Knowing one event tells you nothing about the other: $p(A \text{ and } B) = p(A)p(B)$.</dd>
+    <dt>Prior / posterior</dt><dd>Belief before evidence / belief after evidence.</dd>
+    <dt>Base rate</dt><dd>How common something is in the population before any test.</dd>
+    <dt>Expected value</dt><dd>Probability-weighted average of outcomes.</dd>
+    <dt>Variance</dt><dd>Average squared distance from the expected value; its square root is the standard deviation.</dd>
+  </dl>
+</section>
+
+<nav class="lesson-nav" aria-label="Lesson navigation">
+  <a class="nav-btn" href="module06.html"><small>Previous</small>← Module 6: Gradients</a>
+  <a class="nav-btn next" href="module08.html"><small>Next</small>Module 8: Gaussians →</a>
+</nav>
+
+</main></div>
+<footer>MathMatrix AI &nbsp;|&nbsp; Curriculum by Clark Ngo<br>Every worked example on this page was checked numerically.</footer>
+</body>
+</html>
