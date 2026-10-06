@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4: Orthonormal Bases &amp; Projections | MathMatrix AI</title>
+<meta name="description" content="Projection onto a line, projection matrices, Gram–Schmidt, and least-squares regression as a projection, step by step with real-life uses.">
+<script>window.MathJax = { tex: { inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]] }, svg: { fontCache: "global" } };</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg-full.min.js"></script>
+<link rel="stylesheet" href="assets/lesson.css">
+<script src="assets/lesson.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div class="topbar"><div class="topbar-inner">
+  <a href="index.html" class="back-link">← Course Home</a>
+  <span class="topbar-inst">MathMatrix AI · Clark Ngo</span>
+</div></div>
+
+<header class="lesson-header"><div class="header-inner">
+  <span class="eyebrow">Module 4 · Analytic Geometry</span>
+  <h1>Orthonormal Basis &amp; Orthogonal Projections</h1>
+  <p class="tagline">A projection finds the closest point. That one idea is secretly what linear regression does.</p>
+  <div class="meta-row">
+    <span>📊 Intermediate</span><span>⏱ ~2 hours</span><span>🧮 Needs: Module 3</span>
+    <div class="header-actions"><button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button></div>
+  </div>
+</div></header>
+
+<nav class="section-nav" aria-label="Lesson sections"><div class="section-nav-inner">
+  <a href="#overview">Overview</a>
+  <a href="#s1">Projecting onto a Line</a>
+  <a href="#s2">Projection Matrices</a>
+  <a href="#s3">Gram–Schmidt</a>
+  <a href="#s4">Regression = Projection</a>
+  <a href="#review">Review</a>
+</div></nav>
+
+<div class="layout"><main id="main">
+
+<section id="overview" class="module overview-box">
+  <h2>Lesson overview</h2>
+  <p>Imagine shining a light straight down onto a line: a vector's shadow on that line is its <dfn>projection</dfn>. The shadow is the closest point on the line to the tip of the vector, and the gap between them is perpendicular to the line. When data can't be fit perfectly, "closest possible" is exactly what we want, and that's why least-squares regression is a projection.</p>
+  <h3>By the end of this module you will be able to</h3>
+  <ul class="lo-display">
+    <li>Project a vector onto a line and check that the leftover piece is perpendicular.</li>
+    <li>Build a projection matrix and explain why applying it twice changes nothing.</li>
+    <li>Turn two vectors into perpendicular unit vectors with Gram–Schmidt.</li>
+    <li>Explain least-squares regression as projecting the data onto the model's possibilities.</li>
+  </ul>
+  <div class="need-grid">
+    <div class="need-card"><b>You need</b>Dot products, lengths, and orthogonality (Module 3); the best-fit line (Module 1).</div>
+    <div class="need-card"><b>This unlocks</b>QR decomposition, PCA (Module 5), and Module 10's view of regression.</div>
+  </div>
+</section>
+
+<section id="s1" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🔦</span><h2>Projecting onto a line: finding the shadow</h2><span class="module-time">≈ 25 min</span></div>
+  <p>To project $\mathbf{b}$ onto the line through $\mathbf{a}$, use</p>
+  $$\text{proj}_{\mathbf{a}}\,\mathbf{b} = \frac{\mathbf{a}\cdot\mathbf{b}}{\mathbf{a}\cdot\mathbf{a}}\;\mathbf{a}.$$
+  <p>The fraction is just a number: how many copies of $\mathbf{a}$ the shadow is.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · project $\mathbf{b} = (2, 3)$ onto $\mathbf{a} = (1, 1)$</span>
+    <ol class="steps">
+      <li><div class="step-math">$\mathbf{a}\cdot\mathbf{b} = 1\cdot2 + 1\cdot3 = 5$</div><div class="step-why">How much $\mathbf{b}$ lines up with $\mathbf{a}$.</div></li>
+      <li><div class="step-math">$\mathbf{a}\cdot\mathbf{a} = 1 + 1 = 2$</div><div class="step-why">The length of $\mathbf{a}$, squared. Dividing by it removes the effect of $\mathbf{a}$'s own size.</div></li>
+      <li><div class="step-math">$\text{proj} = \tfrac{5}{2}(1, 1) = (2.5, 2.5)$</div><div class="step-why">2.5 copies of $\mathbf{a}$.</div></li>
+      <li><div class="step-math">Leftover: $\mathbf{b} - \text{proj} = (2 - 2.5,\; 3 - 2.5) = (-0.5, 0.5)$</div><div class="step-why">The part of $\mathbf{b}$ the line can't capture. It's called the <dfn>residual</dfn>.</div></li>
+      <li><div class="step-math">Check: $(-0.5, 0.5)\cdot(1, 1) = -0.5 + 0.5 = 0$ ✓</div><div class="step-why">The residual is perpendicular to the line. This always happens, and it's why the shadow is the <em>closest</em> point.</div></li>
+    </ol>
+    <div class="result">$\mathbf{b} = \underbrace{(2.5, 2.5)}_{\text{along the line}} + \underbrace{(-0.5, 0.5)}_{\text{perpendicular}}$</div>
+  </div>
+  <div class="bridge-box">
+    <span class="box-label">You already know this</span>
+    <p>The shortest path from a point to a line is the perpendicular one. You may have used that in geometry to find the distance from a point to a line.</p>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>A pilot heading northeast, direction $(1, 1)$, flies through a wind of $(2, 3)$ km/h. How much of that wind is a tailwind? It's the length of the projection: $\frac{\mathbf{a}\cdot\mathbf{b}}{\lVert\mathbf{a}\rVert} = \frac{5}{\sqrt{2}} \approx 3.54$ km/h pushing the plane forward; the rest is a crosswind. Engineers split forces the same way: the part of gravity pulling a car down a ramp is a projection.</p>
+    <span class="hook">Projection = the shadow; residual = the part that sticks straight out.</span>
+  </div>
+  <details class="check">
+    <summary>Try it yourself <span class="reveal-hint">(click to reveal the answer)</span></summary>
+    <div class="check-q">Project $(4, 2)$ onto $(1, 0)$, the horizontal axis.</div>
+    <div class="check-a">$\mathbf{a}\cdot\mathbf{b} = 4$, $\mathbf{a}\cdot\mathbf{a} = 1$, so the projection is $4(1, 0) = (4, 0)$. The shadow on the floor just drops the height, as you'd expect.</div>
+  </details>
+</section>
+
+<section id="s2" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🧮</span><h2>Projection matrices: doing it twice changes nothing</h2><span class="module-time">≈ 15 min</span></div>
+  <p>You can package "project onto $\mathbf{a}$" as a matrix $P = \dfrac{\mathbf{a}\mathbf{a}^\top}{\mathbf{a}^\top\mathbf{a}}$, then project anything with $P\mathbf{b}$.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · $P$ for $\mathbf{a} = (1, 1)$</span>
+    <ol class="steps">
+      <li><div class="step-math">$\mathbf{a}\mathbf{a}^\top = \begin{bmatrix}1\\1\end{bmatrix}\begin{bmatrix}1&1\end{bmatrix} = \begin{bmatrix}1&1\\1&1\end{bmatrix}$</div><div class="step-why">Column times row gives a matrix (every pair of entries multiplied).</div></li>
+      <li><div class="step-math">$P = \tfrac{1}{2}\begin{bmatrix}1&1\\1&1\end{bmatrix} = \begin{bmatrix}0.5&0.5\\0.5&0.5\end{bmatrix}$</div><div class="step-why">Divide by $\mathbf{a}^\top\mathbf{a} = 2$.</div></li>
+      <li><div class="step-math">$P\begin{bmatrix}2\\3\end{bmatrix} = \begin{bmatrix}0.5(2) + 0.5(3)\\0.5(2) + 0.5(3)\end{bmatrix} = \begin{bmatrix}2.5\\2.5\end{bmatrix}$ ✓</div><div class="step-why">Same answer as before.</div></li>
+      <li><div class="step-math">$P^2 = P$</div><div class="step-why">Projecting a shadow again gives the same shadow: it's already on the line. (Multiply it out: each entry is $0.5\cdot0.5 + 0.5\cdot0.5 = 0.5$.)</div></li>
+    </ol>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>A photo filter that converts color to grayscale is a projection: applying it to an already-gray photo does nothing. Flattening a 3D scene onto your 2D screen in a video game is also a projection.</p>
+    <span class="hook">Project once and you're done: $P^2 = P$.</span>
+  </div>
+</section>
+
+<section id="s3" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">📏</span><h2>Gram–Schmidt: making perpendicular unit vectors</h2><span class="module-time">≈ 25 min</span></div>
+  <p>Perpendicular vectors of length 1 are the easiest basis to work with. Such a basis is called <dfn>orthonormal</dfn>. <dfn>Gram–Schmidt</dfn> turns any independent vectors into one: keep the first vector's direction, then remove from each next vector its shadow on the earlier ones.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · start with $\mathbf{v}_1 = (3, 4)$ and $\mathbf{v}_2 = (1, 0)$</span>
+    <ol class="steps">
+      <li><div class="step-math">$\mathbf{u}_1 = \dfrac{(3, 4)}{5} = (0.6, 0.8)$</div><div class="step-why">Divide by the length (5) to get a unit vector in the same direction.</div></li>
+      <li><div class="step-math">Shadow of $\mathbf{v}_2$ on $\mathbf{u}_1$: $(\mathbf{v}_2\cdot\mathbf{u}_1)\,\mathbf{u}_1 = 0.6\,(0.6, 0.8) = (0.36, 0.48)$</div><div class="step-why">Because $\mathbf{u}_1$ has length 1, the projection formula simplifies (no dividing).</div></li>
+      <li><div class="step-math">$\mathbf{w} = (1, 0) - (0.36, 0.48) = (0.64, -0.48)$</div><div class="step-why">Remove the shadow; what's left is perpendicular to $\mathbf{u}_1$.</div></li>
+      <li><div class="step-math">$\lVert\mathbf{w}\rVert = \sqrt{0.64^2 + 0.48^2} = 0.8 \;\Rightarrow\; \mathbf{u}_2 = (0.8, -0.6)$</div><div class="step-why">Scale it to length 1.</div></li>
+      <li><div class="step-math">Check: $\mathbf{u}_1\cdot\mathbf{u}_2 = 0.48 - 0.48 = 0$ ✓</div><div class="step-why">Perpendicular, and both have length 1.</div></li>
+    </ol>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>A phone's motion sensors are never mounted perfectly square. Software straightens the measured axes into a clean perpendicular set, the same idea as Gram–Schmidt, so "tilt forward" and "tilt sideways" don't bleed into each other. Statistics software solves regression this way too (a QR decomposition), because it's more numerically stable than computing $X^\top X$.</p>
+    <span class="hook">Keep the first direction; strip each new one of its shadows; resize to length 1.</span>
+  </div>
+</section>
+
+<section id="s4" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🤖</span><h2>Machine learning: least squares is a projection</h2><span class="module-time">≈ 25 min</span></div>
+  <p>Back to the best-fit line from Module 1: points $(1, 1)$, $(2, 2)$, $(3, 2)$ and the line $y = 0.667 + 0.5x$. Look at the line's predictions as one vector:</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · predictions, residuals, and the perpendicular check</span>
+    <ol class="steps">
+      <li><div class="step-math">$\hat{\mathbf{y}} = (0.667 + 0.5,\; 0.667 + 1,\; 0.667 + 1.5) = (1.167, 1.667, 2.167)$</div><div class="step-why">Predicted $y$ at $x = 1, 2, 3$.</div></li>
+      <li><div class="step-math">$\mathbf{r} = \mathbf{y} - \hat{\mathbf{y}} = (1 - 1.167,\; 2 - 1.667,\; 2 - 2.167) = (-0.167, 0.333, -0.167)$</div><div class="step-why">The errors (residuals).</div></li>
+      <li><div class="step-math">$(1, 1, 1)\cdot\mathbf{r} = -0.167 + 0.333 - 0.167 = 0$</div><div class="step-why">Residual is perpendicular to the first column of $X$ (the 1s).</div></li>
+      <li><div class="step-math">$(1, 2, 3)\cdot\mathbf{r} = -0.167 + 0.667 - 0.5 = 0$</div><div class="step-why">…and to the second column (the $x$ values).</div></li>
+    </ol>
+    <div class="result">The errors are perpendicular to everything the model can produce. So $\hat{\mathbf{y}}$ is the projection of $\mathbf{y}$ onto the model's possibilities: the closest the model can get.</div>
+  </div>
+  <p>Writing "residual perpendicular to every column of $X$" as an equation gives $X^\top(\mathbf{y} - X\boldsymbol\theta) = \mathbf{0}$. Rearrange it and you get Module 1's normal equations, $X^\top X\boldsymbol\theta = X^\top\mathbf{y}$. That's where they come from.</p>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Any trend line in a spreadsheet chart (sales by month, temperature by year, rent by square footage) is computed this way. The leftover errors being "perpendicular" means there's no straight-line pattern left in them that the model could still capture.</p>
+    <span class="hook">The best fit is the shadow of the data on what the model can do.</span>
+  </div>
+</section>
+
+<section id="review" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">✅</span><h2>Check your understanding</h2></div>
+  <div class="q-card" data-explain="$\mathbf{a}\cdot\mathbf{b} = 3$, $\mathbf{a}\cdot\mathbf{a} = 1$, so the projection is $3(0, 1) = (0, 3)$.">
+    <div class="q-stem"><span class="q-num">1.</span>Project $(5, 3)$ onto $(0, 1)$.</div>
+    <div class="q-opts">
+      <button class="q-opt" data-why="That's the projection onto the horizontal axis.">$(5, 0)$</button>
+      <button class="q-opt" data-correct>$(0, 3)$</button>
+      <button class="q-opt" data-why="The projection lies on the line through $(0, 1)$.">$(5, 3)$</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="The projection is the closest point, and the gap to the closest point is always perpendicular.">
+    <div class="q-stem"><span class="q-num">2.</span>The residual $\mathbf{b} - \text{proj}_{\mathbf{a}}\mathbf{b}$ is always…</div>
+    <div class="q-opts">
+      <button class="q-opt" data-why="Only if $\mathbf{b}$ is already on the line.">zero</button>
+      <button class="q-opt" data-correct>perpendicular to $\mathbf{a}$</button>
+      <button class="q-opt" data-why="It points away from the line, not along it.">parallel to $\mathbf{a}$</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="A projected vector is already on the target, so projecting again leaves it unchanged: $P^2 = P$.">
+    <div class="q-stem"><span class="q-num">3.</span>What is $P^2$ for any projection matrix $P$?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-why="That's for a matrix that does nothing.">$I$</button>
+      <button class="q-opt" data-correct>$P$</button>
+      <button class="q-opt" data-why="Projections don't erase everything.">$0$</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="glossary" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">📖</span><h2>Key terms</h2></div>
+  <dl class="glossary">
+    <dt>Projection</dt><dd>The closest point on a line or subspace; the "shadow" of a vector.</dd>
+    <dt>Residual</dt><dd>What's left after projecting: $\mathbf{b} - \text{proj}\,\mathbf{b}$. Always perpendicular.</dd>
+    <dt>Orthonormal</dt><dd>Vectors that are mutually perpendicular and each of length 1.</dd>
+    <dt>Gram–Schmidt</dt><dd>A procedure that turns independent vectors into an orthonormal set.</dd>
+    <dt>Least squares</dt><dd>Choosing parameters to minimize the sum of squared residuals.</dd>
+  </dl>
+</section>
+
+<nav class="lesson-nav" aria-label="Lesson navigation">
+  <a class="nav-btn" href="module03.html"><small>Previous</small>← Module 3: Norms &amp; Inner Products</a>
+  <a class="nav-btn next" href="module05.html"><small>Next</small>Module 5: Eigenvalues →</a>
+</nav>
+
+</main></div>
+<footer>MathMatrix AI &nbsp;|&nbsp; Curriculum by Clark Ngo<br>Every worked example on this page was checked numerically.</footer>
+</body>
+</html>

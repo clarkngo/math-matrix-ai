@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 9: Continuous Optimization &amp; Gradient Descent | MathMatrix AI</title>
+<meta name="description" content="Gradient descent by hand, learning-rate limits, ill-conditioning, momentum, convexity, and constrained optimization, with real-life uses.">
+<script>window.MathJax = { tex: { inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]] }, svg: { fontCache: "global" } };</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg-full.min.js"></script>
+<link rel="stylesheet" href="assets/lesson.css">
+<script src="assets/lesson.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div class="topbar"><div class="topbar-inner">
+  <a href="index.html" class="back-link">← Course Home</a>
+  <span class="topbar-inst">MathMatrix AI · Clark Ngo</span>
+</div></div>
+
+<header class="lesson-header"><div class="header-inner">
+  <span class="eyebrow">Module 9 · Optimization</span>
+  <h1>Continuous Optimization &amp; Gradient Descent</h1>
+  <p class="tagline">Training a model is walking downhill on its error surface. Step too timidly and you crawl; step too boldly and you fly off the mountain.</p>
+  <div class="meta-row">
+    <span>📊 Intermediate</span><span>⏱ ~2 hours</span><span>🧮 Needs: Modules 5 and 6</span>
+    <div class="header-actions"><button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button></div>
+  </div>
+</div></header>
+
+<nav class="section-nav" aria-label="Lesson sections"><div class="section-nav-inner">
+  <a href="#overview">Overview</a>
+  <a href="#s1">One Step at a Time</a>
+  <a href="#s2">Step Size</a>
+  <a href="#s3">Narrow Valleys</a>
+  <a href="#s4">Convexity</a>
+  <a href="#s5">Constraints</a>
+  <a href="#review">Review</a>
+</div></nav>
+
+<div class="layout"><main id="main">
+
+<section id="overview" class="module overview-box">
+  <h2>Lesson overview</h2>
+  <p>In algebra you found the minimum of a parabola by completing the square. Real models have millions of parameters and no formula for the answer, so instead we start somewhere and repeatedly step downhill using the gradient (Module 6). That's <dfn>gradient descent</dfn>, and it trains nearly every model in use today.</p>
+  <h3>By the end of this module you will be able to</h3>
+  <ul class="lo-display">
+    <li>Run several steps of gradient descent by hand.</li>
+    <li>Find the largest learning rate that still converges, and explain why.</li>
+    <li>Explain why narrow valleys slow training and how feature scaling helps.</li>
+    <li>Tell convex problems (one valley) from non-convex ones (many).</li>
+    <li>Solve a simple constrained problem with a Lagrange multiplier.</li>
+  </ul>
+  <div class="need-grid">
+    <div class="need-card"><b>You need</b>Derivatives and gradients (Modules 0 and 6); eigenvalues (Module 5) for Section 3.</div>
+    <div class="need-card"><b>This unlocks</b>Training any model (Module 10). Try the <a href="sim-gradient-descent.html">gradient descent simulator</a> alongside this lesson.</div>
+  </div>
+</section>
+
+<section id="s1" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">⬇️</span><h2>Gradient descent, one step at a time</h2><span class="module-time">≈ 20 min</span></div>
+  <p>The rule: new position = old position − (step size) × (slope).</p>
+  $$x_{k+1} = x_k - \eta\, f'(x_k)$$
+  <p>The step size $\eta$ (eta) is called the <dfn>learning rate</dfn>.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · minimize $f(x) = (x - 3)^2$ from $x_0 = 0$ with $\eta = 0.1$</span>
+    <p>The slope is $f'(x) = 2(x - 3)$. (By algebra we already know the answer is $x = 3$, so we can check.)</p>
+    <ol class="steps">
+      <li><div class="step-math">$x_1 = 0 - 0.1 \times 2(0 - 3) = 0 + 0.6 = 0.6$</div><div class="step-why">The slope at 0 is $-6$ (going downhill to the right), so we move right.</div></li>
+      <li><div class="step-math">$x_2 = 0.6 - 0.1 \times 2(0.6 - 3) = 0.6 + 0.48 = 1.08$</div><div class="step-why">The slope is gentler now ($-4.8$), so the step is smaller.</div></li>
+      <li><div class="step-math">$x_3 = 1.08 + 0.384 = 1.464$</div><div class="step-why">Steps keep shrinking as the ground flattens.</div></li>
+      <li><div class="step-math">Distance to 3: $\;3 \to 2.4 \to 1.92 \to 1.536$</div><div class="step-why">Each step multiplies the remaining distance by $0.8$.</div></li>
+    </ol>
+    <div class="result">Slow and steady: the error shrinks by 20% every step and approaches $x = 3$.</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>You're on a hillside in thick fog and want to reach the valley floor. You can't see the bottom, but you can feel which way the ground slopes under your feet. So you take a step downhill, feel again, and step again. On steep ground you take bigger strides; near the bottom, smaller ones. That's gradient descent exactly: the model can't "see" the best parameters, only the local slope of its error.</p>
+    <span class="hook">Feel the slope, step downhill, repeat.</span>
+  </div>
+</section>
+
+<section id="s2" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🎚️</span><h2>Choosing the step size</h2><span class="module-time">≈ 25 min</span></div>
+  <p>Let $e = x - 3$ be the error. One step gives $e_{\text{new}} = e - \eta \cdot 2e = (1 - 2\eta)\,e$. Everything depends on that multiplier $(1 - 2\eta)$.</p>
+  <div class="table-scroll"><table class="symbol-table">
+    <thead><tr><th>$\eta$</th><th>Multiplier $1 - 2\eta$</th><th>What happens</th></tr></thead>
+    <tbody>
+      <tr><td>0.1</td><td>0.8</td><td>Shrinks 20% per step: steady</td></tr>
+      <tr><td>0.5</td><td>0</td><td>Lands exactly on 3 in one step</td></tr>
+      <tr><td>0.9</td><td>−0.8</td><td>Overshoots back and forth, but still shrinks (zig-zag)</td></tr>
+      <tr><td>1.1</td><td>−1.2</td><td>Overshoots by more each time: <strong>diverges</strong></td></tr>
+    </tbody>
+  </table></div>
+  <div class="worked-example">
+    <span class="box-label">Worked example · $\eta = 1.1$ blows up</span>
+    <ol class="steps">
+      <li><div class="step-math">$x_1 = 0 - 1.1 \times (-6) = 6.6$</div><div class="step-why">Jumped right past 3, now 3.6 away.</div></li>
+      <li><div class="step-math">$x_2 = 6.6 - 1.1 \times 7.2 = -1.32$</div><div class="step-why">Overshot the other way, now 4.32 away.</div></li>
+      <li><div class="step-math">$x_3 = 8.184$</div><div class="step-why">5.18 away. Each step makes it worse.</div></li>
+    </ol>
+    <div class="result">The rule: we need $|1 - 2\eta| &lt; 1$, so $0 &lt; \eta &lt; 1$. In general $\eta &lt; 2 / (\text{curvature})$, and here the curvature is $f''(x) = 2$.</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>A new driver parallel parking turns the wheel too far, overcorrects, then overcorrects again, zig-zagging and never settling. A thermostat that blasts full heat whenever it's 1 degree cold does the same. Every control system, from cruise control to a drone's stabilizer, has to pick a correction size that's strong enough to make progress but gentle enough not to overshoot.</p>
+    <span class="hook">Too small: crawling. Too big: overshooting and spiraling out.</span>
+  </div>
+  <details class="check">
+    <summary>Try it yourself <span class="reveal-hint">(click to reveal the answer)</span></summary>
+    <div class="check-q">For $f(x) = 5x^2$, what's the largest learning rate that still converges?</div>
+    <div class="check-a">Curvature $f''(x) = 10$, so $\eta &lt; 2/10 = 0.2$. (Check: $f'(x) = 10x$, multiplier $1 - 10\eta$, and $|1 - 10\eta| &lt; 1$ means $\eta &lt; 0.2$.)</div>
+  </details>
+</section>
+
+<section id="s3" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🏞️</span><h2>Narrow valleys: why some problems are slow</h2><span class="module-time">≈ 25 min</span></div>
+  <p>With two parameters, a surface can be steep in one direction and nearly flat in the other, like a long narrow canyon. Take $f(x, y) = \tfrac{1}{2}(x^2 + 10y^2)$: curvature 1 along $x$, and 10 along $y$.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · one learning rate, two directions</span>
+    <ol class="steps">
+      <li><div class="step-math">$x$ multiplier: $1 - \eta$; $\quad y$ multiplier: $1 - 10\eta$</div><div class="step-why">Same reasoning as Section 2, once per direction.</div></li>
+      <li><div class="step-math">Stability needs $|1 - 10\eta| &lt; 1 \Rightarrow \eta &lt; 0.2$</div><div class="step-why">The <em>steep</em> direction sets the speed limit.</div></li>
+      <li><div class="step-math">With $\eta = 0.15$: $x$ multiplier $0.85$, $y$ multiplier $-0.5$</div><div class="step-why">$y$ zig-zags and settles fast; $x$ creeps along, keeping 85% of its error every step.</div></li>
+    </ol>
+    <div class="result">The ratio of steepest to flattest curvature (here 10) is the <dfn>condition number</dfn> $\kappa$. These curvatures are the eigenvalues of the Hessian matrix (Module 5). Larger $\kappa$ means slower training.</div>
+  </div>
+  <p>Fix: put features on similar scales. If one feature is "price in dollars" (thousands) and another is "number of rooms" (single digits), the error surface is a stretched canyon. Converting both to z-scores (Module 8) rounds it into a bowl. <dfn>Momentum</dfn>, which keeps some of the previous step's direction like a rolling ball, also helps by smoothing out the zig-zag.</p>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Walking down a steep, narrow gorge whose floor slopes gently toward the exit, you'd waste your energy bouncing between the steep walls while barely moving toward the exit. A heavy bowling ball rolling down the same gorge (momentum) evens out the side-to-side bouncing and keeps rolling forward.</p>
+    <span class="hook">The steepest direction sets the speed limit; the flattest direction sets how long the trip takes.</span>
+  </div>
+  <p><a href="sim-gradient-descent.html">Open the simulator →</a> It runs a canyon like this one. Push $\eta$ past 0.2 and watch it diverge.</p>
+</section>
+
+<section id="s4" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🥣</span><h2>Convex vs. non-convex: one valley or many?</h2><span class="module-time">≈ 15 min</span></div>
+  <p>A function is <dfn>convex</dfn> if it's shaped like a bowl: any straight line between two points on the curve stays above the curve. A convex function has only one valley, so walking downhill always finds the best answer.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · $f(x) = x^4 - 3x^2$ has two valleys</span>
+    <ol class="steps">
+      <li><div class="step-math">$f'(x) = 4x^3 - 6x = 2x(2x^2 - 3)$</div><div class="step-why">Power rule, then factor.</div></li>
+      <li><div class="step-math">$f'(x) = 0$ at $x = 0$ and $x = \pm\sqrt{1.5} \approx \pm1.22$</div><div class="step-why">Flat points: a hilltop at 0, and two valley floors.</div></li>
+      <li><div class="step-math">Start at $x = 0.5$: you roll to $+1.22$. Start at $x = -0.5$: you roll to $-1.22$.</div><div class="step-why">Where you end up depends on where you start.</div></li>
+    </ol>
+    <div class="result">Not convex. Here both valleys happen to be equally deep; in general, gradient descent can get stuck in a shallower one.</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Hiking down in fog might land you in a small dip halfway down the mountain rather than the true valley floor. Linear regression is convex, so it always finds the best fit. Neural networks are not convex, which is why training them involves tricks like random restarts and noisy steps (stochastic gradient descent) to avoid getting stuck.</p>
+    <span class="hook">Convex = one bowl, so downhill always wins. Non-convex = many dips, so where you start matters.</span>
+  </div>
+</section>
+
+<section id="s5" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🚧</span><h2>Constraints: the best answer that follows the rules</h2><span class="module-time">≈ 20 min</span></div>
+  <p>Sometimes the answer must satisfy a rule, such as a budget. At the best allowed point, the downhill direction of $f$ must point straight into the rule's boundary (otherwise you could slide along the boundary and do better). That means the two gradients line up: $\nabla f = \lambda\nabla g$, where $\lambda$ is a <dfn>Lagrange multiplier</dfn>.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · minimize $f = x^2 + y^2$ subject to $x + y = 2$</span>
+    <ol class="steps">
+      <li><div class="step-math">$\nabla f = (2x, 2y), \quad \nabla g = (1, 1)$ where $g = x + y$</div><div class="step-why">Gradients of the goal and of the rule.</div></li>
+      <li><div class="step-math">$(2x, 2y) = \lambda(1, 1) \Rightarrow 2x = \lambda = 2y \Rightarrow x = y$</div><div class="step-why">Set them parallel.</div></li>
+      <li><div class="step-math">$x + x = 2 \Rightarrow x = y = 1$</div><div class="step-why">Use the rule to finish.</div></li>
+    </ol>
+    <div class="result">The point on the line $x + y = 2$ closest to the origin is $(1, 1)$, at distance $\sqrt{2}$. This is the projection from Module 4, found a different way.</div>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Where should a bus stop on a straight road go so it's closest to your house? Where should you spend a fixed ad budget across two channels for the most sales? Airlines schedule crews and planes the same way: minimize cost, subject to rules about rest hours and aircraft availability.</p>
+    <span class="hook">At the best allowed point, the goal's slope points straight into the fence.</span>
+  </div>
+</section>
+
+<section id="review" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">✅</span><h2>Check your understanding</h2></div>
+  <div class="q-card" data-explain="$f'(4) = 2(4 - 3) = 2$, so $x_1 = 4 - 0.25 \times 2 = 3.5$.">
+    <div class="q-stem"><span class="q-num">1.</span>For $f(x) = (x - 3)^2$, starting at $x = 4$ with $\eta = 0.25$, what is $x_1$?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-why="You stepped uphill. Subtract the slope term.">4.5</button>
+      <button class="q-opt" data-correct>3.5</button>
+      <button class="q-opt" data-why="With $\eta = 0.25$ the multiplier is 0.5, not 0.">3</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="The steepest curvature is 20, so $\eta &lt; 2/20 = 0.1$.">
+    <div class="q-stem"><span class="q-num">2.</span>A loss has curvatures 2 and 20 in its two directions. What's the largest stable learning rate?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-why="That's set by the flat direction; the steep one would diverge.">1</button>
+      <button class="q-opt" data-correct>0.1</button>
+      <button class="q-opt" data-why="That's the condition number, not a learning rate.">10</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="A convex function has one valley, so gradient descent (with a sensible step size) reaches the global minimum from anywhere.">
+    <div class="q-stem"><span class="q-num">3.</span>Why is convexity good news?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-correct>Downhill always leads to the single best answer</button>
+      <button class="q-opt" data-why="Step size still matters for convex functions.">Any learning rate works</button>
+      <button class="q-opt" data-why="You still need to step; convexity just guarantees where you'll end up.">You don't need gradients</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="glossary" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">📖</span><h2>Key terms</h2></div>
+  <dl class="glossary">
+    <dt>Gradient descent</dt><dd>Repeatedly step opposite the gradient: $\mathbf{x} \leftarrow \mathbf{x} - \eta\nabla f(\mathbf{x})$.</dd>
+    <dt>Learning rate $\eta$</dt><dd>The step size; must be below $2/(\text{largest curvature})$.</dd>
+    <dt>Condition number $\kappa$</dt><dd>Steepest curvature ÷ flattest curvature; large means slow training.</dd>
+    <dt>Momentum</dt><dd>Carrying part of the previous step forward to smooth out zig-zags.</dd>
+    <dt>Convex</dt><dd>Bowl-shaped; has a single minimum.</dd>
+    <dt>Lagrange multiplier</dt><dd>The factor $\lambda$ in $\nabla f = \lambda\nabla g$ at a constrained optimum.</dd>
+  </dl>
+</section>
+
+<nav class="lesson-nav" aria-label="Lesson navigation">
+  <a class="nav-btn" href="module08.html"><small>Previous</small>← Module 8: Gaussians</a>
+  <a class="nav-btn next" href="module10.html"><small>Next</small>Module 10: Probabilistic Modeling →</a>
+</nav>
+
+</main></div>
+<footer>MathMatrix AI &nbsp;|&nbsp; Curriculum by Clark Ngo<br>Every worked example on this page was checked numerically.</footer>
+</body>
+</html>

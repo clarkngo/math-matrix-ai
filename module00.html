@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 0: Math Toolkit | MathMatrix AI</title>
+<meta name="description" content="Start here: the symbols and ideas used throughout MathMatrix AI, translated back into the algebra you already know.">
+<script>window.MathJax = { tex: { inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]] }, svg: { fontCache: "global" } };</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg-full.min.js"></script>
+<link rel="stylesheet" href="assets/lesson.css">
+<script src="assets/lesson.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div class="topbar"><div class="topbar-inner">
+  <a href="index.html" class="back-link">← Course Home</a>
+  <span class="topbar-inst">MathMatrix AI · Clark Ngo</span>
+</div></div>
+
+<header class="lesson-header"><div class="header-inner">
+  <span class="eyebrow">Module 0 · Start Here</span>
+  <h1>The Math Toolkit: Reading the Symbols</h1>
+  <p class="tagline">Most of the "hard" math in machine learning is algebra you already know, written in a compressed notation. This module translates every symbol you'll meet back into plain algebra.</p>
+  <div class="meta-row">
+    <span>📊 Beginner</span><span>⏱ ~1 hour</span><span>🧮 Needs: basic algebra</span>
+    <div class="header-actions"><button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button></div>
+  </div>
+</div></header>
+
+<nav class="section-nav" aria-label="Lesson sections"><div class="section-nav-inner">
+  <a href="#overview">Overview</a>
+  <a href="#s1">Subscripts &amp; Vectors</a>
+  <a href="#s2">Sums (Σ)</a>
+  <a href="#s3">Functions</a>
+  <a href="#s4">Slope → Derivative</a>
+  <a href="#s5">Symbol Decoder</a>
+  <a href="#s6">Course Map</a>
+  <a href="#review">Review</a>
+</div></nav>
+
+<div class="layout"><main id="main">
+
+<section id="overview" class="module overview-box">
+  <h2>Why start here</h2>
+  <p>When you see something like $\boldsymbol\theta_{\text{MAP}} = \arg\max_{\boldsymbol\theta} \sum_n \log p(y_n \mid \boldsymbol\theta)$, it looks like a different language. It isn't. Every piece of it is something you have done in algebra class: plug numbers into a formula, add up a list, find where a curve is highest. The notation just packs a lot into a small space.</p>
+  <p>The rule for this whole course: <strong>whenever you see a new symbol, ask "what would this be with actual numbers?"</strong> Every module does that for you with worked examples.</p>
+  <h3>By the end of this module you will be able to</h3>
+  <ul class="lo-display">
+    <li>Read subscripts like $x_1, x_2$ and vectors like $\mathbf{x} = (3, 4)$.</li>
+    <li>Expand a sum written with $\Sigma$ and compute it.</li>
+    <li>Use function notation $f(x)$ and evaluate a function at a point.</li>
+    <li>Explain a derivative as the slope of a curve at a point.</li>
+    <li>Recognize the Greek letters the course uses and what each usually means.</li>
+  </ul>
+</section>
+
+<div class="part-banner">Part A · Notation</div>
+
+<section id="s1" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🔢</span><h2>Subscripts and vectors: naming a list of numbers</h2><span class="module-time">≈ 10 min</span></div>
+  <p>In algebra you used separate letters: $x$, $y$, $z$. Once you have 100 variables you run out of letters, so math uses one letter with a small number underneath, called a <dfn>subscript</dfn>: $x_1, x_2, x_3, \dots$. The subscript is just a label, like a seat number. $x_2$ means "the second $x$", not "$x$ times 2".</p>
+  <p>A <dfn>vector</dfn> is an ordered list of numbers, written in bold: $\mathbf{x} = (x_1, x_2)$. You can read it two ways, and both are useful:</p>
+  <ul>
+    <li><strong>As data:</strong> a house with 3 bedrooms and 4 bathrooms is $\mathbf{x} = (3, 4)$.</li>
+    <li><strong>As an arrow:</strong> start at the origin, go 3 right and 4 up.</li>
+  </ul>
+  <figure class="figure">
+    <svg viewBox="0 0 220 170" width="220" role="img" aria-label="An arrow from the origin to the point (3, 4)">
+      <g stroke="var(--border)" stroke-width="1">
+        <line x1="30" y1="150" x2="210" y2="150"/><line x1="30" y1="150" x2="30" y2="10"/>
+      </g>
+      <g fill="var(--text-muted)" font-size="11" font-family="inherit">
+        <text x="200" y="165">x₁</text><text x="10" y="18">x₂</text>
+        <text x="117" y="165">3</text><text x="18" y="58">4</text>
+      </g>
+      <line x1="120" y1="150" x2="120" y2="55" stroke="var(--border)" stroke-dasharray="4 3"/>
+      <line x1="30" y1="55" x2="120" y2="55" stroke="var(--border)" stroke-dasharray="4 3"/>
+      <line x1="30" y1="150" x2="116" y2="59" stroke="var(--accent)" stroke-width="3"/>
+      <polygon points="120,55 108,60 115,67" fill="var(--accent)"/>
+      <text x="126" y="50" font-size="12" fill="var(--text)" font-family="inherit">x = (3, 4)</text>
+    </svg>
+    <figcaption>The same vector, read as an arrow: 3 across, 4 up.</figcaption>
+  </figure>
+  <div class="bridge-box">
+    <span class="box-label">You already know this</span>
+    <p>A point $(3, 4)$ on a graph is a vector. You've been using vectors since you first plotted points.</p>
+  </div>
+  <div class="worked-example">
+    <span class="box-label">Worked example · adding and scaling vectors</span>
+    <p>Let $\mathbf{a} = (1, 2)$ and $\mathbf{b} = (3, 1)$.</p>
+    <ol class="steps">
+      <li><div class="step-math">$\mathbf{a} + \mathbf{b} = (1+3,\; 2+1) = (4, 3)$</div><div class="step-why">Add matching positions. First with first, second with second.</div></li>
+      <li><div class="step-math">$2\mathbf{a} = (2\cdot1,\; 2\cdot2) = (2, 4)$</div><div class="step-why">Multiplying by a number (a <dfn>scalar</dfn>) multiplies every entry. As an arrow, it points the same way but is twice as long.</div></li>
+      <li><div class="step-math">$2\mathbf{a} + \mathbf{b} = (2+3,\; 4+1) = (5, 5)$</div><div class="step-why">Combine the two rules. This "scale then add" move is called a <dfn>linear combination</dfn>, and it is the single most important operation in this course.</div></li>
+    </ol>
+  </div>
+    <div class="life-box">
+    <span class="box-label">In real life</span>
+    <ul>
+      <li><strong>Your location</strong> on a map app is a vector: (latitude, longitude) = (47.61, −122.33) for Seattle.</li>
+      <li><strong>A color on your screen</strong> is a vector of red, green, blue amounts: orange is (255, 165, 0).</li>
+      <li><strong>A recipe</strong> is a vector of amounts: (2 cups flour, 1 cup sugar). Doubling the recipe is $2 \times (2, 1) = (4, 2)$. Making one batch of cookies plus one batch of cake is adding the two recipe vectors.</li>
+    </ul>
+    <p>Streaming apps store each song as a vector like (tempo, energy, danceability). Songs with similar vectors get recommended together.</p>
+    <span class="hook">A vector is a shopping list where the order of items is fixed.</span>
+  </div>
+<details class="check">
+    <summary>Try it yourself <span class="reveal-hint">(click to reveal the answer)</span></summary>
+    <div class="check-q">With $\mathbf{a} = (1, 2)$ and $\mathbf{b} = (3, 1)$, compute $3\mathbf{a} - \mathbf{b}$.</div>
+    <div class="check-a">$3\mathbf{a} = (3, 6)$, then subtract $\mathbf{b}$: $(3-3,\; 6-1) = (0, 5)$.</div>
+  </details>
+</section>
+
+<section id="s2" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">➕</span><h2>Sums with Σ: "add these up"</h2><span class="module-time">≈ 10 min</span></div>
+  <p>The capital Greek letter sigma, $\Sigma$, means "add up". It's shorthand for a long addition:</p>
+  $$\sum_{i=1}^{3} i^2 \quad\text{means}\quad \text{"let } i \text{ go } 1, 2, 3\text{; compute } i^2 \text{ each time; add the results."}$$
+  <div class="worked-example">
+    <span class="box-label">Worked example · expanding a sum</span>
+    <ol class="steps">
+      <li><div class="step-math">$i = 1:\; 1^2 = 1$</div><div class="step-why">Start at the number under the $\Sigma$.</div></li>
+      <li><div class="step-math">$i = 2:\; 2^2 = 4$</div><div class="step-why">Go up by one.</div></li>
+      <li><div class="step-math">$i = 3:\; 3^2 = 9$</div><div class="step-why">Stop at the number on top of the $\Sigma$.</div></li>
+      <li><div class="step-math">$1 + 4 + 9 = 14$</div><div class="step-why">Add everything you got.</div></li>
+    </ol>
+    <div class="result">$\displaystyle\sum_{i=1}^{3} i^2 = 14$</div>
+  </div>
+  <p>In machine learning the thing being summed is usually <em>one term per data point</em>. If you have three data points with errors $e_1 = 2$, $e_2 = -1$, $e_3 = 3$, the total squared error is</p>
+  $$\sum_{n=1}^{3} e_n^2 = 2^2 + (-1)^2 + 3^2 = 4 + 1 + 9 = 14.$$
+  <div class="bridge-box">
+    <span class="box-label">You already know this</span>
+    <p>An average is a sum divided by a count: $\bar{x} = \frac{1}{N}\sum_{n=1}^{N} x_n$. The average of $2, 4, 9$ is $\frac{1}{3}(2+4+9) = 5$.</p>
+  </div>
+  <p>A related symbol, the capital Greek pi $\prod$, means "multiply these together" instead of adding. You'll see it in probability (Modules 7 and 10): $\prod_{i=1}^{3} i = 1\cdot2\cdot3 = 6$.</p>
+    <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Every receipt is a $\Sigma$. If you buy 2 coffees at \$3, 1 sandwich at \$5, and 4 cookies at \$1, the total is</p>
+    $$\sum_{i=1}^{3} \text{qty}_i \times \text{price}_i = 2(3) + 1(5) + 4(1) = 15 \text{ dollars}.$$
+    <p>Your phone's weekly step count, your monthly budget, and a teacher's class average all work the same way.</p>
+    <span class="hook">$\Sigma$ is the "Total" line at the bottom of a receipt.</span>
+  </div>
+<details class="check">
+    <summary>Try it yourself <span class="reveal-hint">(click to reveal the answer)</span></summary>
+    <div class="check-q">Compute $\displaystyle\sum_{k=1}^{4} 2k$.</div>
+    <div class="check-a">$2(1) + 2(2) + 2(3) + 2(4) = 2 + 4 + 6 + 8 = 20$.</div>
+  </details>
+</section>
+
+<section id="s3" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">⚙️</span><h2>Functions: a machine that takes an input</h2><span class="module-time">≈ 10 min</span></div>
+  <p>$f(x) = x^2 - 4x + 3$ is a rule: give it a number $x$, it gives back a number. Writing $f(5)$ means "replace every $x$ with 5".</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · evaluating a function</span>
+    <ol class="steps">
+      <li><div class="step-math">$f(5) = 5^2 - 4(5) + 3$</div><div class="step-why">Replace each $x$ with 5.</div></li>
+      <li><div class="step-math">$= 25 - 20 + 3 = 8$</div><div class="step-why">Order of operations: powers, then multiplication, then add and subtract.</div></li>
+    </ol>
+  </div>
+  <p>In ML, a function often takes a whole vector as input. A model that predicts house price from bedrooms $x_1$ and bathrooms $x_2$ might be</p>
+  $$f(\mathbf{x}) = 50 + 30x_1 + 20x_2, \qquad f(3, 4) = 50 + 90 + 80 = 220 \text{ (thousand dollars)}.$$
+  <p>The numbers $50, 30, 20$ are the model's <dfn>parameters</dfn>. Training a model means finding good values for them. The course writes parameters as $\boldsymbol\theta$ (theta), so you'll see $f(\mathbf{x};\boldsymbol\theta)$: "a function of the input $\mathbf{x}$, using parameters $\boldsymbol\theta$".</p>
+    <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>A rideshare fare is a function with three parameters: a base fee, a price per mile, and a price per minute.</p>
+    $$\text{fare}(\text{miles}, \text{minutes}) = 2.50 + 1.20 \times \text{miles} + 0.30 \times \text{minutes}$$
+    <p>A 10-mile, 20-minute ride costs $2.50 + 12.00 + 6.00 = \$20.50$. If you only had a pile of old receipts and had to <em>work out</em> the 2.50, 1.20, and 0.30, that would be training a model.</p>
+    <span class="hook">A model is a function; training is figuring out its numbers from examples.</span>
+  </div>
+<details class="check">
+    <summary>Try it yourself <span class="reveal-hint">(click to reveal the answer)</span></summary>
+    <div class="check-q">Using the house-price model above, what does it predict for a 2-bedroom, 1-bathroom house?</div>
+    <div class="check-a">$f(2, 1) = 50 + 30(2) + 20(1) = 50 + 60 + 20 = 130$ thousand dollars.</div>
+  </details>
+</section>
+
+<section id="s4" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">📈</span><h2>From slope to derivative: how fast is it changing?</h2><span class="module-time">≈ 15 min</span></div>
+  <p>You know the slope of a line: rise over run. Through the points $(1, 2)$ and $(3, 8)$ the slope is $\frac{8-2}{3-1} = 3$. Every step right, the line goes up 3.</p>
+  <p>A curve doesn't have one slope; it's steeper in some places than others. The <dfn>derivative</dfn> $f'(x)$ is the slope of the curve <em>at one point</em>. You find it by taking the slope between two points that are very close together.</p>
+  <div class="worked-example">
+    <span class="box-label">Worked example · the slope of $f(x) = x^2$ at $x = 3$</span>
+    <ol class="steps">
+      <li><div class="step-math">$f(3) = 9, \quad f(3.001) = 9.006001$</div><div class="step-why">Pick a second point a tiny distance (0.001) to the right.</div></li>
+      <li><div class="step-math">$\text{slope} \approx \dfrac{9.006001 - 9}{0.001} = 6.001$</div><div class="step-why">Rise over run, exactly like a line.</div></li>
+      <li><div class="step-math">$f'(x) = 2x \;\Rightarrow\; f'(3) = 6$</div><div class="step-why">The power rule (below) gives the exact answer. Our estimate of 6.001 was very close.</div></li>
+    </ol>
+  </div>
+  <p>You don't need to compute tiny differences every time. A few rules cover almost everything in this course:</p>
+  <div class="table-scroll"><table class="symbol-table">
+    <thead><tr><th>Rule</th><th>In words</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td>$x^n \to n x^{n-1}$</td><td>Power rule: bring the power down, subtract one from it</td><td>$x^3 \to 3x^2$</td></tr>
+      <tr><td>$c \to 0$</td><td>A constant doesn't change, so its slope is zero</td><td>$7 \to 0$</td></tr>
+      <tr><td>$c\,g(x) \to c\,g'(x)$</td><td>Constants in front just come along</td><td>$5x^2 \to 10x$</td></tr>
+      <tr><td>$g + h \to g' + h'$</td><td>Take the derivative of each piece separately</td><td>$3x^2 + 2x + 1 \to 6x + 2$</td></tr>
+    </tbody>
+  </table></div>
+  <div class="ml-box">
+    <span class="box-label">Why this matters for ML</span>
+    <p>Training a model means making an error function as small as possible. The derivative tells you which way is downhill: if the slope is positive, decrease $x$; if it's negative, increase $x$. That idea, "step downhill using the slope", is gradient descent (Module 9).</p>
+  </div>
+    <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Your car's <strong>speedometer</strong> shows a derivative: how fast your position is changing right now. If a car's distance in meters after $t$ seconds is $d(t) = 5t^2$, its speed is $d'(t) = 10t$, so at $t = 3$ seconds it's going 30 meters per second.</p>
+    <p>Your phone's battery estimate ("12% per hour") is also a rate of change: the derivative of battery level over time.</p>
+    <span class="hook">The derivative is the speedometer, not the odometer.</span>
+  </div>
+<details class="check">
+    <summary>Try it yourself <span class="reveal-hint">(click to reveal the answer)</span></summary>
+    <div class="check-q">Find the derivative of $f(x) = 4x^2 - 3x + 10$, then its slope at $x = 2$.</div>
+    <div class="check-a">$f'(x) = 8x - 3$. At $x = 2$: $8(2) - 3 = 13$.</div>
+  </details>
+</section>
+
+<section id="s5" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🔤</span><h2>The symbol decoder</h2><span class="module-time">≈ 10 min</span></div>
+  <p>Keep this table open while you work through the course. Each symbol is introduced properly in the module listed.</p>
+  <div class="table-scroll"><table class="symbol-table">
+    <thead><tr><th>Symbol</th><th>Read it as</th><th>What it usually means here</th><th>Module</th></tr></thead>
+    <tbody>
+      <tr><td>$\mathbf{x}$, $\mathbf{v}$</td><td>"vector x"</td><td>A list of numbers; an arrow</td><td>0, 2</td></tr>
+      <tr><td>$A$, $X$</td><td>"matrix A"</td><td>A grid of numbers; a transformation; a data table</td><td>1</td></tr>
+      <tr><td>$A^\top$</td><td>"A transpose"</td><td>Flip rows and columns</td><td>1</td></tr>
+      <tr><td>$A^{-1}$</td><td>"A inverse"</td><td>The matrix that undoes $A$</td><td>1</td></tr>
+      <tr><td>$\in$</td><td>"is in"</td><td>$x \in \mathbb{R}$: $x$ is a real number</td><td>2</td></tr>
+      <tr><td>$\mathbb{R}^n$</td><td>"R n"</td><td>All lists of $n$ real numbers</td><td>2</td></tr>
+      <tr><td>$\lVert\mathbf{x}\rVert$</td><td>"norm of x"</td><td>Length of the arrow</td><td>3</td></tr>
+      <tr><td>$\mathbf{x}\cdot\mathbf{y}$, $\mathbf{x}^\top\mathbf{y}$</td><td>"x dot y"</td><td>Multiply matching entries, then add</td><td>3</td></tr>
+      <tr><td>$\det(A)$</td><td>"determinant"</td><td>How much $A$ stretches area</td><td>5</td></tr>
+      <tr><td>$\lambda$</td><td>lambda</td><td>An eigenvalue (a stretch factor), or a penalty strength</td><td>5, 10</td></tr>
+      <tr><td>$\frac{\partial f}{\partial x}$</td><td>"partial f partial x"</td><td>Slope of $f$ in the $x$ direction only</td><td>6</td></tr>
+      <tr><td>$\nabla f$</td><td>"grad f"</td><td>The list of all partial slopes; points uphill</td><td>6</td></tr>
+      <tr><td>$p(A)$, $p(A \mid B)$</td><td>"probability of A (given B)"</td><td>Chance of A (when B is known to be true)</td><td>7</td></tr>
+      <tr><td>$\mu$, $\sigma$</td><td>mu, sigma</td><td>Mean (center) and standard deviation (spread)</td><td>7, 8</td></tr>
+      <tr><td>$\Sigma$ (as a matrix)</td><td>"covariance matrix"</td><td>How several variables spread and move together</td><td>8</td></tr>
+      <tr><td>$\eta$</td><td>eta</td><td>Learning rate: the step size</td><td>9</td></tr>
+      <tr><td>$\boldsymbol\theta$</td><td>theta</td><td>The model's parameters</td><td>0, 10</td></tr>
+      <tr><td>$\arg\min_x f(x)$</td><td>"arg min"</td><td>The <em>input</em> $x$ that makes $f$ smallest (not the smallest value itself)</td><td>9</td></tr>
+    </tbody>
+  </table></div>
+  <div class="worked-example">
+    <span class="box-label">Worked example · min vs. arg min</span>
+    <p>For $f(x) = (x - 3)^2 + 1$:</p>
+    <ol class="steps">
+      <li><div class="step-math">$(x-3)^2 \ge 0$, and it equals $0$ only when $x = 3$.</div><div class="step-why">A square is never negative.</div></li>
+      <li><div class="step-math">$\min_x f(x) = 0 + 1 = 1$</div><div class="step-why">The smallest <em>output</em>.</div></li>
+      <li><div class="step-math">$\arg\min_x f(x) = 3$</div><div class="step-why">The <em>input</em> that produces that smallest output. In ML we almost always want the arg min: the parameter values, not the error value.</div></li>
+    </ol>
+  </div>
+  <div class="life-box">
+    <span class="box-label">In real life</span>
+    <p>Picking the cheapest phone plan: Plan A costs \$40, Plan B \$35, Plan C \$50. The <strong>min</strong> is \$35. The <strong>arg min</strong> is "Plan B", the thing you actually sign up for. Training a model is the same: we want the settings (arg min), not just the error score.</p>
+    <span class="hook">min is the price you pay; arg min is the plan you pick.</span>
+  </div>
+</section>
+
+<section id="s6" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">🗺️</span><h2>Course map: how the modules connect</h2><span class="module-time">≈ 5 min</span></div>
+  <p>Each module builds on earlier ones. If something in a later module feels unfamiliar, the arrow tells you where to go back to.</p>
+  <div class="table-scroll"><table class="symbol-table">
+    <thead><tr><th>Module</th><th>Big idea in one sentence</th><th>Builds on</th></tr></thead>
+    <tbody>
+      <tr><td><a href="module01.html">1</a></td><td>A matrix packs a system of equations into one object you can solve.</td><td>0</td></tr>
+      <tr><td><a href="module02.html">2</a></td><td>Vectors you can build from a few "ingredient" vectors form a space; rank counts the ingredients.</td><td>1</td></tr>
+      <tr><td><a href="module03.html">3</a></td><td>Length, distance, and angle between vectors, all from the dot product.</td><td>2</td></tr>
+      <tr><td><a href="module04.html">4</a></td><td>Projection finds the closest point; least-squares regression is a projection.</td><td>3</td></tr>
+      <tr><td><a href="module05.html">5</a></td><td>Eigenvectors are directions a matrix only stretches; they reveal a matrix's structure.</td><td>2, 4</td></tr>
+      <tr><td><a href="module06.html">6</a></td><td>Gradients are slopes in many directions at once; they power training.</td><td>0, 1</td></tr>
+      <tr><td><a href="module07.html">7</a></td><td>Probability rules and Bayes' theorem update beliefs with evidence.</td><td>0</td></tr>
+      <tr><td><a href="module08.html">8</a></td><td>The bell curve in one and many dimensions, and how it changes under a transformation.</td><td>5, 7</td></tr>
+      <tr><td><a href="module09.html">9</a></td><td>Gradient descent walks downhill; the learning rate must respect the curvature.</td><td>5, 6</td></tr>
+      <tr><td><a href="module10.html">10</a></td><td>Fitting a model is maximizing probability; regularization is a prior belief.</td><td>4, 8, 9</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="review" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">✅</span><h2>Check your understanding</h2></div>
+  <div class="q-card" data-explain="The subscript is a label. $x_3$ is the third entry of the list.">
+    <div class="q-stem"><span class="q-num">1.</span>If $\mathbf{x} = (5, 8, 2)$, what is $x_3$?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-why="That's $x_1$, the first entry.">5</button>
+      <button class="q-opt" data-why="The subscript is a position, not a multiplier.">15</button>
+      <button class="q-opt" data-correct>2</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="$(1-1) + (2-1) + (3-1) = 0 + 1 + 2 = 3$.">
+    <div class="q-stem"><span class="q-num">2.</span>What is $\sum_{i=1}^{3} (i - 1)$?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-correct>3</button>
+      <button class="q-opt" data-why="That's $1 + 2 + 3$. Remember to subtract 1 from each term first.">6</button>
+      <button class="q-opt" data-why="Check the first term: $i = 1$ gives $1 - 1 = 0$, then keep going.">2</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+  <div class="q-card" data-explain="A negative slope means the function goes down as $x$ increases, so increasing $x$ moves you downhill.">
+    <div class="q-stem"><span class="q-num">3.</span>At some point, $f'(x) = -4$. To make $f$ smaller, should you increase or decrease $x$?</div>
+    <div class="q-opts">
+      <button class="q-opt" data-correct>Increase $x$</button>
+      <button class="q-opt" data-why="With a negative slope, moving left (decreasing $x$) goes uphill.">Decrease $x$</button>
+    </div>
+    <div class="q-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="glossary" class="module">
+  <div class="module-head"><span class="module-icon" aria-hidden="true">📖</span><h2>Key terms</h2></div>
+  <dl class="glossary">
+    <dt>Vector</dt><dd>An ordered list of numbers, also pictured as an arrow from the origin.</dd>
+    <dt>Scalar</dt><dd>A single number, used to stretch or shrink a vector.</dd>
+    <dt>Linear combination</dt><dd>Scale some vectors and add them: $a\mathbf{u} + b\mathbf{v}$.</dd>
+    <dt>Parameter</dt><dd>A number inside a model that training adjusts.</dd>
+    <dt>Derivative</dt><dd>The slope of a function at a single point.</dd>
+    <dt>arg min</dt><dd>The input value that makes a function smallest.</dd>
+  </dl>
+</section>
+
+<nav class="lesson-nav" aria-label="Lesson navigation">
+  <a class="nav-btn" href="index.html"><small>Back</small>Course Home</a>
+  <a class="nav-btn next" href="module01.html"><small>Next</small>Module 1: Linear Systems →</a>
+</nav>
+
+</main></div>
+<footer>MathMatrix AI &nbsp;|&nbsp; Curriculum by Clark Ngo<br>Every worked example on this page was checked numerically.</footer>
+</body>
+</html>
